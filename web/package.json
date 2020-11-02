@@ -18,7 +18,6 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start-server": "ts-node src/foo.ts",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
