@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { DatabaseError } from 'ts-postgres';
+import { DatabaseError } from 'pg';
 
 export class InputDataError extends Error {
     constructor(
