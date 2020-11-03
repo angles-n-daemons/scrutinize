@@ -6,7 +6,7 @@ CREATE TABLE Observation(
 	metric_name     VARCHAR(256),
 	value           NUMERIC NOT NULL,
 	user_id         VARCHAR(256) NOT NULL,
-	treatment       BOOLEAN NOT NULL,
+	treatment       VARCHAR(256) NOT NULL,
 	created_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE(treatment_id, metric_name)
 );

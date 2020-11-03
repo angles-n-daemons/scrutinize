@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+	"allowUnreachableCode": false,
+	"alwaysStrict": true,
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "target": "es6",
+    "strict": true
+  },
+  "include": ["src"]
+}
