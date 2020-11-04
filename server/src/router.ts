@@ -3,6 +3,7 @@ import { Request, Response, Router as ExpressRouter } from 'express';
 import Controller from './controller';
 
 // Async routing copied from: https://stackoverflow.com/a/57099213
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const asyncHandler = (fn: any) => (req: Request, res: Response, next: any) => {
 	return Promise
 		.resolve(fn(req, res, next))
@@ -15,10 +16,10 @@ function toAsyncRouter(router: ExpressRouter) {
 		'delete'  // & etc.
 	];
 
-	for (let key in router) {
+	for (const key in router) {
 		if (methods.includes(key)) {
 			// @ts-ignore
-			let method = router[key];
+			const method = router[key];
 			// @ts-ignore
 			router[key] = (path, ...callbacks) => method.call(router, path, ...callbacks.map(cb => asyncHandler(cb)));
 		}

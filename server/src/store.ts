@@ -39,7 +39,7 @@ export class PGStore {
         )).rows;
     }
 
-    public async createExperiment(experiment: Experiment) {
+    public async createExperiment(experiment: Experiment): Promise<void> {
 		await this.db.query(
             `
             INSERT INTO Experiment(name, percentage)
@@ -50,7 +50,7 @@ export class PGStore {
         await this.db.query('COMMIT');
     }
 
-    public async createTreatment(t: Treatment) {
+    public async createTreatment(t: Treatment): Promise<void> {
         const { user_id, treatment, error, experiment_name } = t;
 		await this.db.query(
             `
@@ -67,7 +67,7 @@ export class PGStore {
         await this.db.query('COMMIT');
     }
 
-    public async upsertMetric(metric: Metric) {
+    public async upsertMetric(metric: Metric): Promise<void> {
         const { name, experiment_name } = metric;
 		await this.db.query(
             `
@@ -83,7 +83,7 @@ export class PGStore {
         await this.db.query('COMMIT');
     }
 
-    public async createObservation(observation: Observation) {
+    public async createObservation(observation: Observation): Promise<void> {
         const { metric_name, value, user_id, experiment_name } = observation;
         await this.db.query('BEGIN');
 		await this.db.query(

@@ -20,15 +20,15 @@ export default class Controller {
         return await this.store.getExperiments();
     }
 
-    public async createExperiment(experiment: Experiment) {
+    public async createExperiment(experiment: Experiment): Promise<void> {
         await this.store.createExperiment(experiment);
     }
 
-    public async createTreatment(treatment: Treatment) {
+    public async createTreatment(treatment: Treatment): Promise<void> {
         await this.store.createTreatment(treatment);
     }
 
-    public async createObservation(observation: Observation) {
+    public async createObservation(observation: Observation): Promise<void> {
         const { experiment_name, metric_name } = observation;
         await this.store.upsertMetric({
             experiment_name,

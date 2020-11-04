@@ -21,7 +21,7 @@ function getRequestLog(
     return `[${chalk.cyan(formatted_date)}] ${method} ${url} ${statusStr} ${durationStr}`;
 }
 
-export default function logMiddleware(req: Request, res: Response, next: Function) {
+export default function logMiddleware(req: Request, res: Response, next: () => void): void {
     const current_datetime = new Date();
     const formatted_date =
         current_datetime.getFullYear() +
@@ -57,4 +57,4 @@ export default function logMiddleware(req: Request, res: Response, next: Functio
     })
 
     next();
-};
+}
