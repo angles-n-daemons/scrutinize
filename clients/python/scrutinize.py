@@ -86,7 +86,7 @@ class Experiment:
         self,
         name: str,
         percentage: int,
-        client: TrialrunClient,
+        client: ScrutinizeClient,
     ):
         self.name = name
         self.percentage = percentage

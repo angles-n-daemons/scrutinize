@@ -138,7 +138,7 @@ def run_seed_from_file(conn):
     
 
 if __name__ == '__main__':
-    conn = psycopg2.connect(host='0.0.0.0', dbname='trialrun', user='postgres', password='password')
+    conn = psycopg2.connect(host='0.0.0.0', dbname='scrutinize', user='postgres', password='password')
     try:
         run_seed_from_file(conn)
     finally:
