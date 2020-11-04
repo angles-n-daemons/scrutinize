@@ -7,8 +7,7 @@ CREATE TABLE Observation(
 	value           NUMERIC NOT NULL,
 	user_id         VARCHAR(256) NOT NULL,
 	treatment       VARCHAR(256) NOT NULL,
-	created_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	UNIQUE(treatment_id, metric_name)
+	created_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 

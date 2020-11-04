@@ -37,8 +37,8 @@ export default class Controller {
         await this.store.createObservation(observation);
     }
 
-    public async getMetrics(): Promise<Metric[]> {
-        return await this.store.getMetrics();
+    public async getMetrics(experiment: string): Promise<Metric[]> {
+        return await this.store.getMetrics(experiment);
     }
 
     public async getPerformance(experiment: string): Promise<Performance> {

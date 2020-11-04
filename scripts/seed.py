@@ -5,9 +5,6 @@ from contextlib import closing
 
 import psycopg2
 
-from server.config import Config
-from server.store import ExperimentStorePSQL
-
 names = ['emma', 'olivia', 'ava', 'isabella', 'sophia', 'mia', 'charlotte', 'amelia', 'evelyn', 'abigail', 'harper', 'emily', 'elizabeth', 'avery', 'sofia', 'ella', 'madison', 'scarlett', 'victoria', 'aria', 'grace', 'chloe', 'camila', 'penelope', 'riley', 'layla', 'lillian', 'nora', 'zoey', 'mila', 'aubrey', 'hannah', 'lily', 'addison', 'eleanor', 'natalie', 'luna', 'savannah', 'brooklyn', 'leah', 'zoe', 'stella', 'hazel', 'ellie', 'paisley', 'audrey', 'skylar', 'liam', 'noah', 'william', 'james', 'logan', 'benjamin', 'mason', 'elijah', 'oliver', 'jacob', 'lucas', 'michael', 'alexander', 'ethan', 'daniel', 'matthew', 'aiden', 'henry', 'joseph', 'jackson', 'samuel', 'sebastian', 'david', 'carter', 'wyatt', 'jayden', 'john', 'owen', 'dylan', 'luke', 'gabriel', 'anthony', 'isaac', 'grayson', 'jack', 'julian', 'levi', 'christopher', 'joshua', 'andrew', 'lincoln', 'mateo'] 
 
 def generate_time_on_page(fun_checkout: bool, human_agent: bool) -> float:
@@ -46,8 +43,8 @@ def fake_poisson(low: int, med: int, high: int) -> float:
     else:
         return low + (med * random.random())
 
-def add_treatment(store, experiment_name, user_id, treatment, current_ts):
-    with closing(store.conn.cursor()) as cur:
+def add_treatment(conn, experiment_name, user_id, treatment, current_ts):
+    with closing(conn.cursor()) as cur:
         cur.execute(
             '''
             INSERT INTO Treatment(experiment_id, user_id, treatment, created_time)
@@ -57,11 +54,11 @@ def add_treatment(store, experiment_name, user_id, treatment, current_ts):
             (experiment_name, user_id, treatment, current_ts),
         )
         tid = cur.fetchone()[0]
-        store.conn.commit()
+        conn.commit()
         return tid
 
-def add_observation(store, experiment_name, user_id, tid,  treatment, value, metric, current_ts):
-    with closing(store.conn.cursor()) as cur:
+def add_observation(conn, experiment_name, user_id, tid,  treatment, value, metric, current_ts):
+    with closing(conn.cursor()) as cur:
         # Insert into observation table for analysis
         cur.execute(
             '''
@@ -70,6 +67,7 @@ def add_observation(store, experiment_name, user_id, tid,  treatment, value, met
             ''',
             (experiment_name, metric, user_id, tid, treatment, value, current_ts),
         )
+        conn.commit()
 
 def run_seed(store):
     treatment_lookup = {name: {
@@ -117,7 +115,7 @@ def run_seed(store):
 
         current_ts += timedelta(days=1)
 
-def run_seed_from_file(store):
+def run_seed_from_file(conn):
     file_location = '/Users/godzilla/Downloads/ab_data.csv'
     with open(file_location, 'r') as f:
         reader = csv.DictReader(f)
@@ -129,19 +127,19 @@ def run_seed_from_file(store):
                 return
             user_id = row['user_id']
             created_ts = datetime.strptime(row['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
-            treatment = row['group'] == 'treatment'
-            converted_base = (.19 if treatment else .12) + (random.random() * .04)
+            treatment = 'experiment' if row['group'] == 'treatment' else 'control'
+            converted_base = (.19 if treatment == 'experiment' else .12) + (random.random() * .04)
             converted = int(random.random() < converted_base)
-            tid = add_treatment(store, 'landing_page', user_id, treatment, created_ts)
-            add_observation(store, 'landing_page', user_id, tid, treatment, converted, 'converted', created_ts)
+            if str(created_ts.date()) > '2017-01-14':
+                converted += .12
+            tid = add_treatment(conn, 'landing_page', user_id, treatment, created_ts)
+            add_observation(conn, 'landing_page', user_id, tid, treatment, converted, 'converted', created_ts)
             count += 1
     
 
 if __name__ == '__main__':
-    config = Config.read_from_environment()
-    db = psycopg2.connect(config.db_connect_string())
-    store = ExperimentStorePSQL(db)
+    conn = psycopg2.connect(host='0.0.0.0', dbname='trialrun', user='postgres', password='password')
     try:
-        run_seed_from_file(store)
+        run_seed_from_file(conn)
     finally:
-        store.conn.close()
+        conn.close()

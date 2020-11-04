@@ -6,6 +6,7 @@ import {
     Observation,
     Performance,
     Treatment,
+    DataPoint,
 } from './model';
 
 export interface Store {
@@ -14,8 +15,8 @@ export interface Store {
     createTreatment: (data: Treatment) => Promise<void>;
     createObservation: (data: Observation) => Promise<void>;
     upsertMetric: (data: Metric) => Promise<void>;
-    getMetrics: () => Promise<Metric[]>;
-    getPerformance: (experiment_name: string) => Promise<Performance>;
+    getMetrics: (experiment: string) => Promise<Metric[]>;
+    getPerformance: (experiment: string) => Promise<Performance>;
     healthy: () => Promise<boolean>;
 }
 
@@ -23,6 +24,14 @@ export class PGStore {
     constructor (
         private db: Client,
     ) {}
+
+    public async healthy(): Promise<boolean> {
+		const rows = (await this.db.query(
+            `SELECT COUNT(*) FROM Experiment`
+        )).rows;
+ 
+        return rows.length === 1;
+    }
 
     public async getExperiments(): Promise<Experiment[]> {
 		return (await this.db.query(
@@ -99,20 +108,45 @@ export class PGStore {
         await this.db.query('COMMIT');
     }
 
-    public async getMetrics(): Promise<Metric[]> {
-        return [];
-    }
-
-    public async getPerformance(): Promise<Performance> {
-        return {};
-    }
-
-    public async healthy(): Promise<boolean> {
-		const rows = (await this.db.query(
-            `SELECT COUNT(*) FROM Experiment`
+    public async getMetrics(experiment: string): Promise<Metric[]> {
+		return (await this.db.query(
+            `SELECT name FROM Metric WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)`,
+            [experiment],
         )).rows;
- 
-        return rows.length === 1;
+    }
+
+    public async getPerformance(experiment: string): Promise<Performance> {
+		const rows = (await this.db.query(
+            `
+            SELECT metric_name, DATE(created_time), treatment, COUNT(*), AVG(value), STDDEV(value)
+              FROM Observation
+             WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
+             GROUP BY 1, 2, 3
+             ORDER BY 1, 2 ASC, 3 ASC
+            `,
+            [experiment],
+        )).rows as DataPoint[];
+
+        const performance: Performance = {};
+        for (const row of rows) {
+            const { metric_name, treatment, count, avg, stddev } = row;
+            // data transformation - node-postgres returns strings
+            row.count = parseFloat(count as unknown as string);
+            row.avg = parseFloat(avg as unknown as string);
+            row.stddev = parseFloat(stddev as unknown as string);
+
+            if (!performance[metric_name]) {
+                performance[metric_name] = {
+                    control: [],
+                    experiment: [],
+                };
+            }
+            if (!performance[metric_name][treatment]) {
+                performance[metric_name][treatment] = []
+            }
+            performance[metric_name][treatment].push(row);
+        }
+        return performance;
     }
 }
 

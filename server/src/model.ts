@@ -35,8 +35,10 @@ export interface MetricData {
 }
 
 export interface DataPoint {
+    metric_name: string;
+    treatment: 'control' | 'experiment';
     date: string;
     count: number;
-    average: number;
+    avg: number;
     stddev: number;
 }

@@ -1,6 +1,6 @@
 import { Configuration } from 'ts-postgres';
 
-const ENV_BASE='TRIALRUN';
+const ENV_BASE='SCRUTINIZE';
 
 export interface ProcessEnv {
     [key: string]: string | undefined
@@ -32,7 +32,7 @@ export default class Config {
             parseInt(env[`${ENV_BASE}_PORT`] || '5001'),
             env[`${ENV_BASE}_DB_HOST`] || '0.0.0.0',
             parseInt(env[`${ENV_BASE}_DB_PORT`] || '5432'),
-            env[`${ENV_BASE}_DB_NAME`] || 'trialrun',
+            env[`${ENV_BASE}_DB_NAME`] || 'scrutinize',
             env[`${ENV_BASE}_DB_USER`] || 'postgres',
             env[`${ENV_BASE}_DB_PASSWORD`] || 'password',
         );

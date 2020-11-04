@@ -5,7 +5,7 @@ import time
 
 from typing import Callable
 
-class TrialrunClient:
+class ScrutinizeClient:
     def __init__(
         self,
         host: str='localhost:5001',
