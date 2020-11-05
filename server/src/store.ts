@@ -10,6 +10,7 @@ import {
 } from './model';
 
 export interface Store {
+    healthy: () => Promise<boolean>;
     getExperiments: () => Promise<Experiment[]>;
     createExperiment: (data: Experiment) => Promise<void>;
     createTreatment: (data: Treatment) => Promise<void>;
@@ -17,7 +18,6 @@ export interface Store {
     upsertMetric: (data: Metric) => Promise<void>;
     getMetrics: (experiment: string) => Promise<Metric[]>;
     getPerformance: (experiment: string) => Promise<Performance>;
-    healthy: () => Promise<boolean>;
 }
 
 export class PGStore {
