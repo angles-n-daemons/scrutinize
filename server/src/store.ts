@@ -1,4 +1,4 @@
-import { Client } from 'pg';
+import { Pool } from 'pg';
 
 import {
     Experiment,
@@ -22,11 +22,11 @@ export interface Store {
 
 export class PGStore {
     constructor (
-        private db: Client,
+        private pool: Pool,
     ) {}
 
     public async healthy(): Promise<boolean> {
-		const rows = (await this.db.query(
+		const rows = (await this.pool.query(
             `SELECT COUNT(*) FROM Experiment`
         )).rows;
  
@@ -34,25 +34,24 @@ export class PGStore {
     }
 
     public async getExperiments(): Promise<Experiment[]> {
-		return (await this.db.query(
+		return (await this.pool.query(
             `SELECT id, name, percentage, created_time, last_active_time FROM Experiment`
         )).rows;
     }
 
     public async createExperiment(experiment: Experiment): Promise<void> {
-		await this.db.query(
+        await this.pool.query(
             `
             INSERT INTO Experiment(name, percentage)
             VALUES ($1, $2)
             `,
             [experiment.name, experiment.percentage],
         );
-        await this.db.query('COMMIT');
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
         const { user_id, treatment, error, experiment_name } = t;
-		await this.db.query(
+		await this.pool.query(
             `
             INSERT INTO Treatment(
                 user_id,
@@ -64,12 +63,11 @@ export class PGStore {
             `,
             [user_id, treatment, error, experiment_name],
         );
-        await this.db.query('COMMIT');
     }
 
     public async upsertMetric(metric: Metric): Promise<void> {
         const { name, experiment_name } = metric;
-		await this.db.query(
+		await this.pool.query(
             `
             INSERT INTO Metric(
                 name,
@@ -80,13 +78,12 @@ export class PGStore {
             `,
             [name, experiment_name],
         );
-        await this.db.query('COMMIT');
     }
 
     public async createObservation(observation: Observation): Promise<void> {
         const { metric_name, value, user_id, experiment_name } = observation;
-        await this.db.query('BEGIN');
-		await this.db.query(
+        await this.pool.query('BEGIN');
+		await this.pool.query(
             `
             INSERT INTO Observation(
                 experiment_id,
@@ -105,18 +102,17 @@ export class PGStore {
             `,
             [metric_name, value.toString(), user_id, user_id, experiment_name],
         );
-        await this.db.query('COMMIT');
     }
 
     public async getMetrics(experiment: string): Promise<Metric[]> {
-		return (await this.db.query(
+		return (await this.pool.query(
             `SELECT name FROM Metric WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)`,
             [experiment],
         )).rows;
     }
 
     public async getPerformance(experiment: string): Promise<Performance> {
-		const rows = (await this.db.query(
+		const rows = (await this.pool.query(
             `
             SELECT metric_name, DATE(created_time), treatment, COUNT(*), AVG(value), STDDEV(value)
               FROM Observation
