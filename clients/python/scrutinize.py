@@ -13,7 +13,7 @@ class ScrutinizeClient:
         experiments_ttl: int=300,
     ):
         self.base_url = f'{protocol}://{host}/api/v1'
-        self.experiments = None
+        self.experiments = {}
         self.experiments_ttl = experiments_ttl
         self.experiments_pull_time = 0
 
@@ -21,29 +21,37 @@ class ScrutinizeClient:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.alive())
 
-    async def init_experiment(self, name: str, percentage: int) -> Experiment:
-        self.create_experiment
-
-    async def get_experiments(self, name: str, percentage: int):
-        await self.post('/experiment', json={'name': name, 'percentage': percentage})
+    async def load_experiment(self, name: str) -> Experiment:
+        experiment = self.get_experiments().get(name, None)
+        if experiment == None:
+            print('ScrutinizeClient.load_experiment: experiment not found, only control will be run')
+        return Experiment(name, self)
 
     async def get_experiments(self):
         now = int(time.time())
         if now - self.experiment_pull_time > self.experiment_ttl:
-            self.experiments = await self.get('/experiment')
+            experiments = await self.get('/experiment')
+            for experiment in experiments:
+                self.experiments[experiment['name']] = experiment
             self.experiment_pull_time = now
         return self.experiments
+
+    async def create_experiment(self, name: str, percentage: int):
+        await self.post('/experiment', json={'name': name, 'percentage': percentage})
 
     async def create_treatment(
         self,
         experiment_name: str,
         user_id: str,
         treatment: bool,
+        error: Exception,
     ):
+        errStr = '' if error is None else str(error)
         await self.post('/treatment', {
             'experiment_name': experiment_name,
             'user_id': user_id,
             'treatment': treatment,
+            'error': errStr,
         })
 
     async def record_observation(
@@ -85,7 +93,6 @@ class Experiment:
     def __init__(
         self,
         name: str,
-        percentage: int,
         client: ScrutinizeClient,
     ):
         self.name = name
@@ -95,7 +102,7 @@ class Experiment:
     def call(
         self,
         user_id: str,
-        primary: Callable,
+        control: Callable,
         experiment: Callable,
     ):
         id_int = int(hashlib.md5(user_id.encode('utf-8')).hexdigest(), 16) % 100
@@ -105,14 +112,14 @@ class Experiment:
             # convert id to a number between 0 and 99
             id_int = int(hashlib.md5(user_id).hexdigest(), 16) % 100
             if id_int > self.percentage:
-                primary()
+                control()
             else:
                 experiment()
         except Exception as e:
             err = e
             raise e
         finally:
-            self.client.create_treatment(self.name, user_id, treatment)
+            self.client.create_treatment(self.name, user_id, treatment, error)
             
 
     def observe(
@@ -121,4 +128,4 @@ class Experiment:
         metric: str,
         value: float,
     ):
-        self.client.record_observation(experiment_name, user_id, metric, value)
+        self.client.record_observation(self.name, user_id, metric, value)
