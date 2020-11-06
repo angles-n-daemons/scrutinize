@@ -1,9 +1,93 @@
 import aiohttp
 import asyncio
 import hashlib
+import inspect
 import time
 
+from abc import ABC, abstractmethod
 from typing import Callable
+
+
+class Client(ABC):
+    @abstractmethod
+    async def load_experiment(self, name: str) -> any:
+        pass
+
+    @abstractmethod
+    async def get_experiments(self):
+        pass
+
+    @abstractmethod
+    async def create_experiment(self, name: str, percentage: int):
+        await self.post('/experiment', json={'name': name, 'percentage': percentage})
+
+    @abstractmethod
+    async def create_treatment(
+        self,
+        experiment_name: str,
+        user_id: str,
+        treatment: bool,
+        error: Exception,
+    ):
+        pass
+
+    @abstractmethod
+    async def record_observation(
+        self,
+        experiment_name: str,
+        user_id: str,
+        metric: str,
+        value: float,
+    ):
+        pass
+
+
+class Experiment:
+    def __init__(
+        self,
+        name: str,
+        client: Client,
+    ):
+        self.name = name
+        self.client = client
+
+    async def call(
+        self,
+        user_id: str,
+        control: Callable,
+        experiment: Callable,
+    ):
+        experiment_config = (await self.client.get_experiments()).get(self.name, None)
+
+        treatment = False
+        if experiment_config is None:
+            print('Experiment.call: experiment not found, only control will be run')
+        else:
+            # convert id to a number between 0 and 99
+            id_int = int(hashlib.md5(user_id.encode('utf-8')).hexdigest(), 16) % 100
+            treatment = id_int < experiment_config['percentage']
+
+        err = None
+        f = experiment if treatment else control
+        try:
+            if inspect.iscoroutinefunction(f):
+                return await f()
+            else:
+                return f()
+        except Exception as e:
+            err = e
+            raise e
+        finally:
+            await self.client.create_treatment(self.name, user_id, treatment, err)
+            
+
+    async def observe(
+        self,
+        user_id: str,
+        metric: str,
+        value: float,
+    ):
+        await self.client.record_observation(self.name, user_id, metric, value)
 
 class ScrutinizeClient:
     def __init__(
@@ -22,18 +106,18 @@ class ScrutinizeClient:
         loop.run_until_complete(self.alive())
 
     async def load_experiment(self, name: str) -> Experiment:
-        experiment = self.get_experiments().get(name, None)
+        experiment = (await self.get_experiments()).get(name, None)
         if experiment == None:
             print('ScrutinizeClient.load_experiment: experiment not found, only control will be run')
         return Experiment(name, self)
 
     async def get_experiments(self):
         now = int(time.time())
-        if now - self.experiment_pull_time > self.experiment_ttl:
+        if now - self.experiments_pull_time > self.experiments_ttl:
             experiments = await self.get('/experiment')
             for experiment in experiments:
                 self.experiments[experiment['name']] = experiment
-            self.experiment_pull_time = now
+            self.experiments_pull_time = now
         return self.experiments
 
     async def create_experiment(self, name: str, percentage: int):
@@ -87,45 +171,3 @@ class ScrutinizeClient:
 
     async def alive(self):
         return bool(await self.get('/alive'))
-
-
-class Experiment:
-    def __init__(
-        self,
-        name: str,
-        client: ScrutinizeClient,
-    ):
-        self.name = name
-        self.percentage = percentage
-        self.client = client
-
-    def call(
-        self,
-        user_id: str,
-        control: Callable,
-        experiment: Callable,
-    ):
-        id_int = int(hashlib.md5(user_id.encode('utf-8')).hexdigest(), 16) % 100
-        treatment = id_int < self.percentage
-        err = None
-        try:
-            # convert id to a number between 0 and 99
-            id_int = int(hashlib.md5(user_id).hexdigest(), 16) % 100
-            if id_int > self.percentage:
-                control()
-            else:
-                experiment()
-        except Exception as e:
-            err = e
-            raise e
-        finally:
-            self.client.create_treatment(self.name, user_id, treatment, error)
-            
-
-    def observe(
-        self,
-        user_id: str,
-        metric: str,
-        value: float,
-    ):
-        self.client.record_observation(self.name, user_id, metric, value)
