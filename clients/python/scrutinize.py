@@ -148,7 +148,7 @@ class ScrutinizeClient:
         await self.post('/observation', {
             'experiment_name': experiment_name,
             'user_id': user_id,
-            'metric': metric,
+            'metric_name': metric,
             'value': value,
         })
 

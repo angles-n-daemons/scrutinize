@@ -21,7 +21,7 @@ import {
 } from "react-router-dom";
 
 import ExperimentList from './components/Experiments';
-import Explorer from './components/Explorer';
+import PerformancePage from './components/Performance';
 
 const drawerWidth = 240;
 
@@ -74,11 +74,11 @@ export default function App() {
           <div className={classes.toolbar} />
           <Divider />
           <List>
-            <ListItem component={Link} to='/' button key="Home">
+            <ListItem component={Link} to='/' button key="Experiments">
               <ListItemIcon><GraphicEqIcon /></ListItemIcon>
               <ListItemText primary="Experiments" />
             </ListItem>
-            <ListItem component={Link} to='/performance' button key="Home">
+            <ListItem component={Link} to='/performance' button key="Performance">
               <ListItemIcon><TimelineIcon /></ListItemIcon>
               <ListItemText primary="Performance" />
             </ListItem>
@@ -92,7 +92,7 @@ export default function App() {
               <ExperimentList />
             </Route>
             <Route path="/performance">
-              <Explorer />
+              <PerformancePage />
             </Route>
           </Switch>
         </main>

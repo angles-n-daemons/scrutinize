@@ -122,6 +122,8 @@ export class PGStore {
             `,
             [experiment],
         )).rows as DataPoint[];
+        console.log(rows);
+        console.log(experiment);
 
         const performance: Performance = {};
         for (const row of rows) {

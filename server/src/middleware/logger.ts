@@ -16,7 +16,7 @@ function getRequestLog(
     start: [number, number],
 ) {
     const durationInMilliseconds = getDurationInMilliseconds(start)
-    const statusStr = status > 205 ? chalk.redBright(status) : chalk.greenBright(status);
+    const statusStr = status > 380 ? chalk.redBright(status) : chalk.greenBright(status);
     const durationStr = durationInMilliseconds > 1000 ? chalk.redBright(durationInMilliseconds) : chalk.greenBright(durationInMilliseconds);
     return `[${chalk.cyan(formatted_date)}] ${method} ${url} ${statusStr} ${durationStr}`;
 }

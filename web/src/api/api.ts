@@ -14,7 +14,7 @@ export interface DataPoint {
  
 
 class API {
-    async getExperiments(search: string='') {
+    async getExperiments(search: string='') { 
         return await fetch(`${BASE_PATH}/experiment`);
     }
     async getPerformance(experiment: string): Promise<Record<string, PerformanceData>> {

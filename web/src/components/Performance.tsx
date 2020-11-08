@@ -14,6 +14,7 @@ export default function PerformancePage() {
     const experiment = params.get('experiment') || '';
     useEffect(() => {
         async function getPerformances() {
+            console.log(await API.getPerformance(experiment));
             setPerformance(await API.getPerformance(experiment));
         }
         getPerformances();
