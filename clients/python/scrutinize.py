@@ -69,6 +69,7 @@ class Experiment:
 
         err = None
         f = experiment if treatment else control
+        treatment_str = 'experiment' if treatment else 'control'
         try:
             if inspect.iscoroutinefunction(f):
                 return await f()
@@ -78,7 +79,7 @@ class Experiment:
             err = e
             raise e
         finally:
-            await self.client.create_treatment(self.name, user_id, treatment, err)
+            await self.client.create_treatment(self.name, user_id, treatment_str, err)
             
 
     async def observe(
@@ -86,8 +87,9 @@ class Experiment:
         user_id: str,
         metric: str,
         value: float,
+        created_time: str=None,
     ):
-        await self.client.record_observation(self.name, user_id, metric, value)
+        await self.client.record_observation(self.name, user_id, metric, value, created_time)
 
 class ScrutinizeClient:
     def __init__(
@@ -100,10 +102,6 @@ class ScrutinizeClient:
         self.experiments = {}
         self.experiments_ttl = experiments_ttl
         self.experiments_pull_time = 0
-
-        # verify configuration
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.alive())
 
     async def load_experiment(self, name: str) -> Experiment:
         experiment = (await self.get_experiments()).get(name, None)
@@ -127,15 +125,15 @@ class ScrutinizeClient:
         self,
         experiment_name: str,
         user_id: str,
-        treatment: bool,
+        treatment: str,
         error: Exception,
     ):
-        errStr = '' if error is None else str(error)
+        err_str = '' if error is None else str(error)
         await self.post('/treatment', {
             'experiment_name': experiment_name,
             'user_id': user_id,
             'treatment': treatment,
-            'error': errStr,
+            'error': err_str,
         })
 
     async def record_observation(
@@ -144,12 +142,14 @@ class ScrutinizeClient:
         user_id: str,
         metric: str,
         value: float,
+        created_time: str=None,
     ):
         await self.post('/observation', {
             'experiment_name': experiment_name,
             'user_id': user_id,
             'metric_name': metric,
             'value': value,
+            'created_time': created_time,
         })
 
     async def get(

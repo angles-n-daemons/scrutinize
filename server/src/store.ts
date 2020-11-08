@@ -81,8 +81,7 @@ export class PGStore {
     }
 
     public async createObservation(observation: Observation): Promise<void> {
-        const { metric_name, value, user_id, experiment_name } = observation;
-        await this.pool.query('BEGIN');
+        const { metric_name, value, user_id, experiment_name, created_time } = observation;
 		await this.pool.query(
             `
             INSERT INTO Observation(
@@ -91,16 +90,18 @@ export class PGStore {
                 metric_name,
                 value,
                 user_id,
-                treatment
+                treatment,
+                created_time
             )
-            SELECT e.id, t.id, $1, $2, $3, t.treatment
+            SELECT e.id, t.id, $1, $2, $3, t.treatment, COALESCE($4, CURRENT_TIMESTAMP)
               FROM Treatment t
               JOIN experiment e ON t.experiment_id = e.id
-             WHERE t.user_id=$4
-               AND e.name=$5
+             WHERE t.user_id=$5
+               AND e.name=$6
+              ORDER BY t.user_id, t.created_time DESC
               LIMIT 1
             `,
-            [metric_name, value.toString(), user_id, user_id, experiment_name],
+            [metric_name, value.toString(), user_id, created_time, user_id, experiment_name],
         );
     }
 
@@ -122,8 +123,6 @@ export class PGStore {
             `,
             [experiment],
         )).rows as DataPoint[];
-        console.log(rows);
-        console.log(experiment);
 
         const performance: Performance = {};
         for (const row of rows) {

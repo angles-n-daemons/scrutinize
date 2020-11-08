@@ -20,6 +20,7 @@ export interface Observation {
     treatment_id: number;
     treatment: string;
     experiment_name: string;
+    created_time?: string;
 }
 
 export interface Metric {
