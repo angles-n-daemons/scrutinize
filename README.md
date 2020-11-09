@@ -29,6 +29,7 @@ CREATE DATABASE scrutinize
 ```
 4. Migrate the database to the most recent schema
 ```
+go get -u github.com/pressly/goose/cmd/goose
 goose -dir db postgres "user=postgres dbname=scrutinize password=<password> sslmode=disable" up
 ```
 5. Start the web server
