@@ -30,6 +30,9 @@ const useStyles = makeStyles({
   pos: {
     marginBottom: 4,
   },
+  title: {
+    fontSize: 14,
+  },
   center: {
     fontSize: '12px',
 	textAlign: 'center',
@@ -73,13 +76,16 @@ export default function PerformanceInfoBar({
     <div className={classes.root}>
       <Card className={classes.detailsCard} variant="outlined">
         <CardContent>
+          <Typography className={classes.title} color="textSecondary" gutterBottom>
+            Experiment
+          </Typography>
           <Typography variant="h6" component="h3">
             {name}
           </Typography>
-          <Typography color="textSecondary">
+          <Typography>
             rollout: {percentage}%
           </Typography>
-          <Typography className={classes.pos} color="textSecondary">
+          <Typography className={classes.pos}>
             status: { active ? 'active' : 'disabled' }
           </Typography>
         </CardContent>
