@@ -10,6 +10,7 @@ export interface Treatment {
     user_id: string;
     treatment: string;
     error: string;
+    duration_ms: number;
     experiment_name: string;
 }
 
@@ -42,4 +43,19 @@ export interface DataPoint {
     count: number;
     avg: number;
     stddev: number;
+}
+
+export interface VariantDetails {
+    variant: string;
+    volume: string;
+    pct_error: string;
+    duration_ms: string;
+}
+
+export interface Details {
+    name: string;
+    percentage: number;
+    created_time?: Date;
+    last_active_time?: Date;
+    variants: VariantDetails[];
 }

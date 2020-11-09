@@ -70,6 +70,7 @@ class Experiment:
         err = None
         f = experiment if treatment else control
         treatment_str = 'experiment' if treatment else 'control'
+        start_time = time.time()
         try:
             if inspect.iscoroutinefunction(f):
                 return await f()
@@ -79,7 +80,8 @@ class Experiment:
             err = e
             raise e
         finally:
-            await self.client.create_treatment(self.name, user_id, treatment_str, err)
+            duration_ms = (time.time() - start_time) * 1000
+            await self.client.create_treatment(self.name, user_id, treatment_str, duration_ms, err)
             
 
     async def observe(
@@ -126,6 +128,7 @@ class ScrutinizeClient:
         experiment_name: str,
         user_id: str,
         treatment: str,
+        duration_ms: float,
         error: Exception,
     ):
         err_str = '' if error is None else str(error)
@@ -134,6 +137,7 @@ class ScrutinizeClient:
             'user_id': user_id,
             'treatment': treatment,
             'error': err_str,
+            'duration_ms': duration_ms,
         })
 
     async def record_observation(

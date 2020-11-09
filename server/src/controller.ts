@@ -3,6 +3,7 @@ import {
     Experiment,
     Metric,
     Observation,
+    Details,
     Performance,
     Treatment,
 } from './model';
@@ -39,6 +40,10 @@ export default class Controller {
 
     public async getMetrics(experiment: string): Promise<Metric[]> {
         return await this.store.getMetrics(experiment);
+    }
+
+    public async getDetails(experiment: string): Promise<Details> {
+        return await this.store.getDetails(experiment);
     }
 
     public async getPerformance(experiment: string): Promise<Performance> {

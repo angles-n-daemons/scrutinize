@@ -4,6 +4,8 @@ import {
     Experiment,
     Metric,
     Observation,
+    VariantDetails,
+    Details,
     Performance,
     Treatment,
     DataPoint,
@@ -17,6 +19,7 @@ export interface Store {
     createObservation: (data: Observation) => Promise<void>;
     upsertMetric: (data: Metric) => Promise<void>;
     getMetrics: (experiment: string) => Promise<Metric[]>;
+    getDetails: (experiment: string) => Promise<Details>;
     getPerformance: (experiment: string) => Promise<Performance>;
 }
 
@@ -50,18 +53,19 @@ export class PGStore {
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
-        const { user_id, treatment, error, experiment_name } = t;
+        const { user_id, treatment, error, duration_ms, experiment_name } = t;
 		await this.pool.query(
             `
             INSERT INTO Treatment(
                 user_id,
                 treatment,
                 error,
+                duration_ms,
                 experiment_id
             )
-            VALUES ($1, $2, $3, (SELECT id FROM Experiment WHERE name=$4))
+            VALUES ($1, $2, $3, $4, (SELECT id FROM Experiment WHERE name=$5))
             `,
-            [user_id, treatment, error, experiment_name],
+            [user_id, treatment, error, duration_ms, experiment_name],
         );
     }
 
@@ -112,6 +116,26 @@ export class PGStore {
         )).rows;
     }
 
+    public async getDetails(experiment: string): Promise<Details> {
+		const details: Details = (await this.pool.query(
+            `SELECT id, name, percentage, created_time, last_active_time
+              FROM Experiment
+             WHERE name=$1`,
+            [experiment],
+        )).rows[0] as Details;
+        details.variants = (await this.pool.query(
+            `SELECT treatment as variant,
+                    AVG(duration_ms) as duration_ms,
+                    1.0 * SUM(CASE WHEN LENGTH(error) > 0 THEN 1 ELSE 0 END) / COUNT(*) as pct_error,
+                    COUNT(*) as volume
+              FROM Treatment
+             WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
+             GROUP BY treatment`,
+            [experiment],
+        )).rows as VariantDetails[];
+        return details;
+    }
+
     public async getPerformance(experiment: string): Promise<Performance> {
 		const rows = (await this.pool.query(
             `
@@ -146,8 +170,3 @@ export class PGStore {
         return performance;
     }
 }
-
-// NOTE: There should be 3 separate ways to do apply observations:
-// 1. Look backward from now over a fixed time
-// 2. Look backward from a certain point over a fixed time
-// 3. Look between a range of times

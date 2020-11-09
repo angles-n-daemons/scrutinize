@@ -5,12 +5,6 @@ import { PerformanceData, DataPoint } from 'api/api';
 // coefficient for 95% confidence
 const Z = 1.960;
 
-function addDays(date: Date, days: number) {
-  var result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
-
 interface PerformanceChartProps {
     performanceData: PerformanceData;
     metricName: string;
@@ -20,11 +14,8 @@ export default function PerformanceChart ({
     performanceData,
     metricName,
 }: PerformanceChartProps) {
-    var today = new Date();
-
     var data = [];
     const experimentDataMap: Record<string, DataPoint> = {};
-    console.log(performanceData);
     for (const dataPoint of performanceData.experiment) {
         experimentDataMap[dataPoint['date']] = dataPoint;
     }

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Chart } from 'react-google-charts';
 
-import ExplorerControls from 'components/explorer/Controls';
-import PerformanceChart from 'components/explorer/Chart';
+import PerformanceInfoBar from 'components/performance/InfoBar';
+import PerformanceChart from 'components/performance/Chart';
 
 import API, { PerformanceData} from 'api/api'
 
@@ -14,15 +13,14 @@ export default function PerformancePage() {
     const experiment = params.get('experiment') || '';
     useEffect(() => {
         async function getPerformances() {
-            console.log(await API.getPerformance(experiment));
             setPerformance(await API.getPerformance(experiment));
         }
         getPerformances();
-    }, []);
+    }, [experiment]);
 
     if (experiment) {
         return (<div>
-            <ExplorerControls />
+            <PerformanceInfoBar experiment={experiment}/>
             {Object.keys(performance).map((key: string) => {
                 const performanceChartProps = {
                     performanceData: performance[key],
