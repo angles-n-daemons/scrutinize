@@ -56,33 +56,20 @@ class Experiment:
         user_id: str,
         control: Callable,
         experiment: Callable,
+        get_time: Callable=time.time,
     ):
-        experiment_config = (await self.client.get_experiments()).get(self.name, None)
-
-        treatment = False
-        if experiment_config is None:
-            print('Experiment.call: experiment not found, only control will be run')
-        else:
-            # convert id to a number between 0 and 99
-            id_int = int(hashlib.md5(user_id.encode('utf-8')).hexdigest(), 16) % 100
-            treatment = id_int < experiment_config['percentage']
-
+        treatment, treatment_str = self._get_treatment(user_id)
+        variant = experiment if treatment else control
+        start_time = get_time()
         err = None
-        f = experiment if treatment else control
-        treatment_str = 'experiment' if treatment else 'control'
-        start_time = time.time()
         try:
-            if inspect.iscoroutinefunction(f):
-                return await f()
-            else:
-                return f()
+            self.resolve(f)
         except Exception as e:
             err = e
             raise e
         finally:
-            duration_ms = (time.time() - start_time) * 1000
+            duration_ms = (get_time() - start_time) * 1000
             await self.client.create_treatment(self.name, user_id, treatment_str, duration_ms, err)
-            
 
     async def observe(
         self,
@@ -92,6 +79,32 @@ class Experiment:
         created_time: str=None,
     ):
         await self.client.record_observation(self.name, user_id, metric, value, created_time)
+
+    async def _get_treatment(self, user_id: str):
+        treatment_operand = (self.name + user_id).encode('utf-8')
+        experiments = await self.client.get_experiments()
+        experiment_config = experiments.get(self.name, None)
+        treatment = False
+
+        if experiment_config is None:
+            print('Experiment.call: experiment not found, only control will be run')
+        else:
+            # convert id to a number between 0 and 99
+            id_int = int(hashlib.md5(treatment_operand).hexdigest(), 16) % 100
+            treatment = id_int < experiment_config['percentage']
+
+        return treatment, 'experiment' if treatment else 'control'
+
+    @staticmethod
+    async def _resolve(
+        variant: any
+    ) -> any:
+        if callable(variant):
+            if inspect.iscoroutinefunciton(variant):
+                return await variant()
+            else:
+                return variant()
+        return variant
 
 class ScrutinizeClient:
     def __init__(
