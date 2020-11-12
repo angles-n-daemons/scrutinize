@@ -1,4 +1,5 @@
 import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import { Chart } from 'react-google-charts';
 import { PerformanceData, DataPoint } from 'api/api';
 
@@ -10,10 +11,18 @@ interface PerformanceChartProps {
     metricName: string;
 }
 
+const useStyles = makeStyles({
+    root: {
+        border: '1px solid rgba(0, 0, 0, 0.12)',
+    },
+});
+
+
 export default function PerformanceChart ({
     performanceData,
     metricName,
 }: PerformanceChartProps) {
+    const classes = useStyles();
     var data = [];
     const experimentDataMap: Record<string, DataPoint> = {};
     for (const dataPoint of performanceData.experiment) {
@@ -50,28 +59,30 @@ export default function PerformanceChart ({
         { id: 'i1', type: 'number', role: 'interval' },
     ]);
 
-    return (<Chart
-      width={'100%'}
-      height={'500px'}
-      chartType="LineChart"
-      loader={<div>Loading Chart</div>}
-      data={data}
-      options={{
-        title: metricName,
-        curveType: 'function',
-        explorer: { 
-          actions: ['dragToPan', 'dragToZoom', 'rightClickToReset'],
-          axis: 'horizontal',
-          keepInBounds: true,
-          maxZoomIn: 4.0,
-        },
-        intervals: { color: 'series-color' },
-        interval: {
-          i0: { color: '#5BE7F8', style: 'area', curveType: 'function', fillOpacity: 0.3 },
-          i1: { color: '#F8775B', style: 'area', curveType: 'function', fillOpacity: 0.3 },
-        },
-        legend: {position: 'bottom', textStyle: {color: 'black', fontSize: 16}}
-      }}
-      rootProps={{ 'data-testid': '8' }}
-    />);
+    return (<div className={classes.root}>
+      <Chart
+        width={'100%'}
+        height={'500px'}
+        chartType="LineChart"
+        loader={<div>Loading Chart</div>}
+        data={data}
+        options={{
+          title: metricName,
+          curveType: 'function',
+          explorer: { 
+            actions: ['dragToPan', 'dragToZoom', 'rightClickToReset'],
+            axis: 'horizontal',
+            keepInBounds: true,
+            maxZoomIn: 4.0,
+          },
+          intervals: { color: 'series-color' },
+          interval: {
+            i0: { color: '#5BE7F8', style: 'area', curveType: 'function', fillOpacity: 0.3 },
+            i1: { color: '#F8775B', style: 'area', curveType: 'function', fillOpacity: 0.3 },
+          },
+          legend: {position: 'bottom', textStyle: {color: 'black', fontSize: 16}}
+        }}
+        rootProps={{ 'data-testid': '8' }}
+      />
+    </div>);
 };

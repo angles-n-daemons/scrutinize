@@ -22,10 +22,12 @@ const useStyles = makeStyles({
   root: {
 	marginTop: '30px',
     marginBottom: '30px',
+    display: 'flex',
   },
   detailsCard: {
-	marginRight: '15px',
+	marginRight: '30px',
     display: 'inline-block',
+    minWidth: '200px',
   },
   pos: {
     marginBottom: 4,
@@ -38,8 +40,10 @@ const useStyles = makeStyles({
 	textAlign: 'center',
   },
   tableContainer: {
-    width: '60%',
     display: 'inline-block',
+    verticalAlign: 'top',
+    border: '1px solid rgba(0, 0, 0, 0.12)',
+    boxShadow: 'none',
   },
   table: {
     minWidth: 650,
@@ -88,9 +92,6 @@ export default function PerformanceInfoBar({
           <Typography className={classes.pos}>
             status: { active ? 'active' : 'disabled' }
           </Typography>
-        </CardContent>
-        <CardContent className={classes.center}>
-            {prettyFormatDate(created_time)} to {prettyFormatDate(last_active_time)}
         </CardContent>
       </Card>
       <TableContainer component={Paper} className={classes.tableContainer}>
