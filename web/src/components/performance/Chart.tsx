@@ -14,6 +14,7 @@ interface PerformanceChartProps {
 const useStyles = makeStyles({
     root: {
         border: '1px solid rgba(0, 0, 0, 0.12)',
+        marginBottom: '25px',
     },
 });
 
