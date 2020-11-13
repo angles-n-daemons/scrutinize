@@ -54,7 +54,7 @@ in question recommends a additional purchases to the user. The metric being trac
 from scrutinize import ScrutinizeClient, Experiment
 
 scrutinize = ScrutinizeClient('localhost:5001')
-experiment = scrutinize.
+experiment = scrutinize.load_experiment('suggest_addons')
 
 class BasketController:
   def __init__(self, experiment: Experiment):
