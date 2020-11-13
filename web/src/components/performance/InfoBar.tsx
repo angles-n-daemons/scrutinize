@@ -21,11 +21,11 @@ function prettyFormatDate(ds: string): string {
 const useStyles = makeStyles({
   root: {
 	marginTop: '30px',
-    marginBottom: '30px',
+    marginBottom: '20px',
     display: 'flex',
   },
   detailsCard: {
-	marginRight: '30px',
+	marginRight: '20px',
     display: 'inline-block',
     minWidth: '200px',
   },
