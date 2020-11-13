@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 import hashlib
-import inspect
 import time
 
 from abc import ABC, abstractmethod
@@ -58,18 +57,24 @@ class Experiment:
         experiment: Callable,
         get_time: Callable=time.time,
     ):
-        treatment, treatment_str = self._get_treatment(user_id)
+        treatment, treatment_str = await self._get_treatment(user_id)
         variant = experiment if treatment else control
         start_time = get_time()
         err = None
         try:
-            self.resolve(f)
+            return await self._resolve(variant)
         except Exception as e:
             err = e
             raise e
         finally:
             duration_ms = (get_time() - start_time) * 1000
-            await self.client.create_treatment(self.name, user_id, treatment_str, duration_ms, err)
+            await self.client.create_treatment(
+                self.name,
+                user_id,
+                treatment_str,
+                duration_ms,
+                '' if err is None else str(err),
+            )
 
     async def observe(
         self,
@@ -100,7 +105,7 @@ class Experiment:
         variant: any
     ) -> any:
         if callable(variant):
-            if inspect.iscoroutinefunciton(variant):
+            if asyncio.iscoroutinefunction(variant):
                 return await variant()
             else:
                 return variant()

@@ -1,7 +1,8 @@
 import unittest
 import asyncio
+from decimal import Decimal
+from unittest.mock import AsyncMock, MagicMock, ANY
 
-from unittest.mock import AsyncMock
 from scrutinize import Experiment
 
 
@@ -15,22 +16,107 @@ class TestExperiment(unittest.TestCase):
         pass
 
     def test_call_distribution(self):
-        pass
+        client = AsyncMock()
+        client.get_experiments.return_value = {
+            'testexp': {'percentage': 50},
+        }
+        experiment = Experiment('testexp', client)
+
+        control = MagicMock()
+        variant = MagicMock()
+
+        tests = [
+            ['lisaa', control],
+            ['garyoi', variant],
+            ['eyjohn', control],
+            ['joan', variant],
+        ]
+
+        for i, (user_id, var) in enumerate(tests):
+            asyncio.run(experiment.call(
+                user_id,
+                lambda: control(i),
+                lambda: variant(i),
+            ))
+
+            var.assert_called_with(i)
 
     def test_call_exception(self):
-        pass
+        client = AsyncMock()
+        client.get_experiments.return_value = {
+            'testexp': {'percentage': 50},
+        }
+        experiment = Experiment('testexp', client)
+        experiment._get_treatment = AsyncMock(return_value=(False, 'control'))
+
+        def exception_raiser():
+            raise(Exception('im an error'))
+
+        try:
+            asyncio.run(experiment.call(
+                'fake_person',
+                exception_raiser,
+                2,
+            ))
+        except:
+            # expect it to raise, just want to make sure treatment created
+            pass
+
+        # We only really care about the duration_ms parameter
+        client.create_treatment.assert_called_with(
+            'testexp',
+            'fake_person',
+            'control',
+             ANY,
+            'im an error',
+        )
 
     def test_call_duration(self):
-        pass
+        client = AsyncMock()
+        experiment = Experiment('testexp', client)
+        experiment._get_treatment = AsyncMock(return_value=(False, 'control'))
+
+        get_time = MagicMock(side_effect=[5, 10])
+        asyncio.run(experiment.call(
+            'fake_person',
+            1,
+            2,
+            get_time,
+        ))
+
+        # We only really care about the duration_ms parameter
+        client.create_treatment.assert_called_with(
+            'testexp',
+            'fake_person',
+            'control',
+            5000,
+            '',
+        )
 
     def test_resolve_func(self):
-        pass
+        experiment = Experiment('testexp', AsyncMock())
+        assert asyncio.run(experiment._resolve(lambda: 26)) == 26
 
     def test_resolve_async(self):
-        pass
+        experiment = Experiment('testexp', AsyncMock())
+        async def variant():
+            return 25
+        assert asyncio.run(experiment._resolve(variant)) == 25
 
     def test_resolve_literal(self):
-        pass
+        tests = [
+            0,
+            1,
+            '1',
+            'harry',
+            False,
+            Decimal(52),
+            None,
+        ]
+        experiment = Experiment('testexp', AsyncMock())
+
+        for expected in tests:
+            assert asyncio.run(experiment._resolve(expected)) == expected
 
     def test_get_treatment(self):
         tests = [
