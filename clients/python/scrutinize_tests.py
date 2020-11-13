@@ -13,9 +13,6 @@ class TestClient(unittest.TestCase):
 
 class TestExperiment(unittest.TestCase):
     def test_call(self):
-        pass
-
-    def test_call_distribution(self):
         client = AsyncMock()
         client.get_experiments.return_value = {
             'testexp': {'percentage': 50},
