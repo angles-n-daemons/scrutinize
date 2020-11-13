@@ -111,7 +111,7 @@ class Experiment:
                 return variant()
         return variant
 
-class ScrutinizeClient:
+class ScrutinizeClient(Client):
     def __init__(
         self,
         host: str='localhost:5001',
