@@ -10,6 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import BlurOnIcon from '@material-ui/icons/BlurOn';
 import GraphicEqIcon from '@material-ui/icons/GraphicEq';
 import TimelineIcon from '@material-ui/icons/Timeline';
 
@@ -79,6 +80,10 @@ export default function App() {
               <ListItemIcon><GraphicEqIcon /></ListItemIcon>
               <ListItemText primary="Experiments" />
             </ListItem>
+            <ListItem component={Link} to='/' button key="Metrics">
+              <ListItemIcon><BlurOnIcon /></ListItemIcon>
+              <ListItemText primary="Metrics" />
+            </ListItem>
             <ListItem component={Link} to='/performance' button key="Performance">
               <ListItemIcon><TimelineIcon /></ListItemIcon>
               <ListItemText primary="Performance" />
@@ -91,6 +96,11 @@ export default function App() {
           <Switch>
             <Route exact path="/">
               <ExperimentList />
+            </Route>
+            <Route exact path="/metrics">
+              <div>TBD Metrics Page
+                <p>Should hold the information about what metrics exist, volume of them and what kind (binomial, continuous, etc)</p>
+              </div>
             </Route>
             <Route path="/performance">
               <PerformancePage />
