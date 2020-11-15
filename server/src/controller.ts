@@ -2,7 +2,7 @@ import { Store } from './store';
 import {
     Experiment,
     Metric,
-    Observation,
+    Measurement,
     Details,
     Performance,
     Treatment,
@@ -29,13 +29,13 @@ export default class Controller {
         await this.store.createTreatment(treatment);
     }
 
-    public async createObservation(observation: Observation): Promise<void> {
-        const { experiment_name, metric_name } = observation;
+    public async createMeasurement(measurement: Measurement): Promise<void> {
+        const { experiment_name, metric_name } = measurement;
         await this.store.upsertMetric({
             experiment_name,
             name: metric_name,
         });
-        await this.store.createObservation(observation);
+        await this.store.createMeasurement(measurement);
     }
 
     public async getMetrics(experiment: string): Promise<Metric[]> {

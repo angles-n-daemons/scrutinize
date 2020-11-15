@@ -8,18 +8,18 @@ export interface Experiment {
 
 export interface Treatment {
     user_id: string;
-    treatment: string;
+    variant: 'control' | 'experiment';
     error: string;
     duration_ms: number;
     experiment_name: string;
 }
 
-export interface Observation {
+export interface Measurement {
     user_id: string;
     metric_name: string;
     value: number;
     treatment_id: number;
-    treatment: string;
+    variant: 'control' | 'experiment';
     experiment_name: string;
     created_time?: string;
 }
@@ -38,7 +38,7 @@ export interface MetricData {
 
 export interface DataPoint {
     metric_name: string;
-    treatment: 'control' | 'experiment';
+    variant: 'control' | 'experiment';
     date: string;
     count: number;
     avg: number;

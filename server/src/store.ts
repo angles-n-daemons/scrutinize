@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 import {
     Experiment,
     Metric,
-    Observation,
+    Measurement,
     VariantDetails,
     Details,
     Performance,
@@ -16,7 +16,7 @@ export interface Store {
     getExperiments: () => Promise<Experiment[]>;
     createExperiment: (data: Experiment) => Promise<void>;
     createTreatment: (data: Treatment) => Promise<void>;
-    createObservation: (data: Observation) => Promise<void>;
+    createMeasurement: (data: Measurement) => Promise<void>;
     upsertMetric: (data: Metric) => Promise<void>;
     getMetrics: (experiment: string) => Promise<Metric[]>;
     getDetails: (experiment: string) => Promise<Details>;
@@ -53,19 +53,19 @@ export class PGStore {
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
-        const { user_id, treatment, error, duration_ms, experiment_name } = t;
+        const { user_id, variant, error, duration_ms, experiment_name } = t;
 		await this.pool.query(
             `
             INSERT INTO Treatment(
                 user_id,
-                treatment,
+                variant,
                 error,
                 duration_ms,
                 experiment_id
             )
             VALUES ($1, $2, $3, $4, (SELECT id FROM Experiment WHERE name=$5))
             `,
-            [user_id, treatment, error, duration_ms, experiment_name],
+            [user_id, variant, error, duration_ms, experiment_name],
         );
     }
 
@@ -84,20 +84,20 @@ export class PGStore {
         );
     }
 
-    public async createObservation(observation: Observation): Promise<void> {
-        const { metric_name, value, user_id, experiment_name, created_time } = observation;
+    public async createMeasurement(measurement: Measurement): Promise<void> {
+        const { metric_name, value, user_id, experiment_name, created_time } = measurement;
 		await this.pool.query(
             `
-            INSERT INTO Observation(
+            INSERT INTO Measurement(
                 experiment_id,
                 treatment_id,
                 metric_name,
                 value,
                 user_id,
-                treatment,
+                variant,
                 created_time
             )
-            SELECT e.id, t.id, $1, $2, $3, t.treatment, COALESCE($4, CURRENT_TIMESTAMP)
+            SELECT e.id, t.id, $1, $2, $3, t.variant, COALESCE($4, CURRENT_TIMESTAMP)
               FROM Treatment t
               JOIN experiment e ON t.experiment_id = e.id
              WHERE t.user_id=$5
@@ -124,13 +124,13 @@ export class PGStore {
             [experiment],
         )).rows[0] as Details;
         details.variants = (await this.pool.query(
-            `SELECT treatment as variant,
+            `SELECT variant,
                     AVG(duration_ms) as duration_ms,
                     1.0 * SUM(CASE WHEN LENGTH(error) > 0 THEN 1 ELSE 0 END) / COUNT(*) as pct_error,
                     COUNT(*) as volume
               FROM Treatment
              WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
-             GROUP BY treatment`,
+             GROUP BY variant`,
             [experiment],
         )).rows as VariantDetails[];
         return details;
@@ -139,8 +139,8 @@ export class PGStore {
     public async getPerformance(experiment: string): Promise<Performance> {
 		const rows = (await this.pool.query(
             `
-            SELECT metric_name, DATE(created_time), treatment, COUNT(*), AVG(value), STDDEV(value)
-              FROM Observation
+            SELECT metric_name, DATE(created_time), variant, COUNT(*), AVG(value), STDDEV(value)
+              FROM Measurement
              WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
              GROUP BY 1, 2, 3
              ORDER BY 1, 2 ASC, 3 ASC
@@ -150,7 +150,7 @@ export class PGStore {
 
         const performance: Performance = {};
         for (const row of rows) {
-            const { metric_name, treatment, count, avg, stddev } = row;
+            const { metric_name, variant, count, avg, stddev } = row;
             // data transformation - node-postgres returns strings
             row.count = parseFloat(count as unknown as string);
             row.avg = parseFloat(avg as unknown as string);
@@ -162,10 +162,10 @@ export class PGStore {
                     experiment: [],
                 };
             }
-            if (!performance[metric_name][treatment]) {
-                performance[metric_name][treatment] = []
+            if (!performance[metric_name][variant]) {
+                performance[metric_name][variant] = []
             }
-            performance[metric_name][treatment].push(row);
+            performance[metric_name][variant].push(row);
         }
         return performance;
     }
