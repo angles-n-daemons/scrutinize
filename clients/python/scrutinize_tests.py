@@ -44,7 +44,7 @@ class TestExperiment(unittest.TestCase):
             'testexp': {'percentage': 50},
         }
         experiment = Experiment('testexp', client)
-        experiment._get_treatment = AsyncMock(return_value=(False, 'control'))
+        experiment._get_variant = AsyncMock(return_value=(False, 'control'))
 
         def exception_raiser():
             raise(Exception('im an error'))
@@ -71,7 +71,7 @@ class TestExperiment(unittest.TestCase):
     def test_call_duration(self):
         client = AsyncMock()
         experiment = Experiment('testexp', client)
-        experiment._get_treatment = AsyncMock(return_value=(False, 'control'))
+        experiment._get_variant = AsyncMock(return_value=(False, 'control'))
 
         get_time = MagicMock(side_effect=[5, 10])
         asyncio.run(experiment.call(
@@ -115,7 +115,7 @@ class TestExperiment(unittest.TestCase):
         for expected in tests:
             assert asyncio.run(experiment._resolve(expected)) == expected
 
-    def test_get_treatment(self):
+    def test_get_variant(self):
         tests = [
             ['jane', True],
             ['tom', False],
@@ -138,10 +138,10 @@ class TestExperiment(unittest.TestCase):
         experiment = Experiment('testexp', client)
 
         for user_id, expected in tests:
-            treatment, _ = asyncio.run(experiment._get_treatment(user_id))
+            treatment, _ = asyncio.run(experiment._get_variant(user_id))
             assert treatment == expected
 
-    def test_get_treatment_differs_with_experiment(self):
+    def test_get_variant_differs_with_experiment(self):
         client = AsyncMock()
         client.get_experiments.return_value = {
             'testexp': {'percentage': 50},
@@ -152,15 +152,15 @@ class TestExperiment(unittest.TestCase):
         experiment2 = Experiment('otherexp', client)
 
         user_id = 'sally'
-        assert asyncio.run(experiment1._get_treatment(user_id)) != asyncio.run(experiment2._get_treatment(user_id))
+        assert asyncio.run(experiment1._get_variant(user_id)) != asyncio.run(experiment2._get_variant(user_id))
 
-    def test_get_treatment_experiment_doesnt_exist(self):
+    def test_get_variant_experiment_doesnt_exist(self):
         client = AsyncMock()
         client.get_experiments.return_value = {
             'SOME_OTHER_EXP': {'percentage': 50},
         }
         experiment1 = Experiment('NON_EXISTENT_EXP', client)
-        assert asyncio.run(experiment1._get_treatment('johnny')) == (False, 'control')
+        assert asyncio.run(experiment1._get_variant('johnny')) == (False, 'control')
 
 
 if __name__ == '__main__':
