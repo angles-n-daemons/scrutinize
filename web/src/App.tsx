@@ -80,7 +80,7 @@ export default function App() {
               <ListItemIcon><GraphicEqIcon /></ListItemIcon>
               <ListItemText primary="Experiments" />
             </ListItem>
-            <ListItem component={Link} to='/' button key="Metrics">
+            <ListItem component={Link} to='/metrics' button key="Metrics">
               <ListItemIcon><BlurOnIcon /></ListItemIcon>
               <ListItemText primary="Metrics" />
             </ListItem>
