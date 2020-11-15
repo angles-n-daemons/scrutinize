@@ -36,7 +36,7 @@ export default class Router {
 		this.getExperiment = this.getExperiment.bind(this);
 		this.postExperiment = this.postExperiment.bind(this);
 		this.postTreatment = this.postTreatment.bind(this);
-		this.postObservation = this.postObservation.bind(this);
+		this.postMeasurement = this.postMeasurement.bind(this);
 		this.getMetrics = this.getMetrics.bind(this);
 		this.getPerformance = this.getPerformance.bind(this);
 	}
@@ -48,7 +48,7 @@ export default class Router {
 		router.get('/experiment', this.getExperiment.bind(this));
 		router.post('/experiment', this.postExperiment.bind(this));
 		router.post('/treatment', this.postTreatment.bind(this));
-		router.post('/observation', this.postObservation.bind(this));
+		router.post('/measurement', this.postMeasurement.bind(this));
 		router.get('/metrics/:experiment', this.getMetrics.bind(this));
 		router.get('/details/:experiment', this.getDetails.bind(this));
 		router.get('/performance/:experiment', this.getPerformance.bind(this));
@@ -86,8 +86,8 @@ export default class Router {
 		res.json({status: 'ok'});
 	}
 
-	private async postObservation(req: Request, res: Response) {
-		await this.controller.createObservation(req.body);
+	private async postMeasurement(req: Request, res: Response) {
+		await this.controller.createMeasurement(req.body);
 		res.json({status: 'ok'});
 	}
 

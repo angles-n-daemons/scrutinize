@@ -57,8 +57,8 @@ class Experiment:
         experiment: Callable,
         get_time: Callable=time.time,
     ):
-        treatment, treatment_str = await self._get_treatment(user_id)
-        variant = experiment if treatment else control
+        is_experiment, variant_str = await self._get_variant(user_id)
+        variant = experiment if is_experiment else control
         start_time = get_time()
         err = None
         try:
@@ -71,7 +71,7 @@ class Experiment:
             await self.client.create_treatment(
                 self.name,
                 user_id,
-                treatment_str,
+                variant_str,
                 duration_ms,
                 '' if err is None else str(err),
             )
@@ -85,20 +85,20 @@ class Experiment:
     ):
         await self.client.record_observation(self.name, user_id, metric, value, created_time)
 
-    async def _get_treatment(self, user_id: str):
-        treatment_operand = (self.name + user_id).encode('utf-8')
+    async def _get_variant(self, user_id: str):
+        variant_operand = (self.name + user_id).encode('utf-8')
         experiments = await self.client.get_experiments()
         experiment_config = experiments.get(self.name, None)
-        treatment = False
+        is_experiment = False
 
         if experiment_config is None:
             print('Experiment.call: experiment not found, only control will be run')
         else:
             # convert id to a number between 0 and 99
-            id_int = int(hashlib.md5(treatment_operand).hexdigest(), 16) % 100
-            treatment = id_int < experiment_config['percentage']
+            id_int = int(hashlib.md5(variant_operand).hexdigest(), 16) % 100
+            is_experiment = id_int < experiment_config['percentage']
 
-        return treatment, 'experiment' if treatment else 'control'
+        return is_experiment, 'experiment' if is_experiment else 'control'
 
     @staticmethod
     async def _resolve(
@@ -145,7 +145,7 @@ class ScrutinizeClient(Client):
         self,
         experiment_name: str,
         user_id: str,
-        treatment: str,
+        variant: str,
         duration_ms: float,
         error: Exception,
     ):
@@ -153,7 +153,7 @@ class ScrutinizeClient(Client):
         await self.post('/treatment', {
             'experiment_name': experiment_name,
             'user_id': user_id,
-            'treatment': treatment,
+            'variant': variant,
             'error': err_str,
             'duration_ms': duration_ms,
         })
@@ -166,7 +166,7 @@ class ScrutinizeClient(Client):
         value: float,
         created_time: str=None,
     ):
-        await self.post('/observation', {
+        await self.post('/measurement', {
             'experiment_name': experiment_name,
             'user_id': user_id,
             'metric_name': metric,
