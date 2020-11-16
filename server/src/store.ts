@@ -70,17 +70,14 @@ export class PGStore {
     }
 
     public async upsertMetric(metric: Metric): Promise<void> {
-        const { name, experiment_name } = metric;
+        const { name } = metric;
 		await this.pool.query(
             `
-            INSERT INTO Metric(
-                name,
-                experiment_id
-            )
-            VALUES ($1, (SELECT id FROM Experiment WHERE name=$2))
+            INSERT INTO Metric (name)
+            VALUES ($1)
             ON CONFLICT DO NOTHING
             `,
-            [name, experiment_name],
+            [name],
         );
     }
 

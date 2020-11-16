@@ -30,9 +30,8 @@ export default class Controller {
     }
 
     public async createMeasurement(measurement: Measurement): Promise<void> {
-        const { experiment_name, metric_name } = measurement;
+        const { metric_name } = measurement;
         await this.store.upsertMetric({
-            experiment_name,
             name: metric_name,
         });
         await this.store.createMeasurement(measurement);

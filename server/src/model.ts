@@ -26,7 +26,6 @@ export interface Measurement {
 
 export interface Metric {
     name: string;
-    experiment_name: string;
 }
 
 export type Performance = Record<string, MetricData>;
