@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
+import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -31,10 +32,29 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
+
 const useStyles = makeStyles({
+  root: {
+    paddingRight: '8%',
+    paddingLeft: '4%',
+  },
+  experimentsHeader: {
+    padding: '20px 0px 27px 0px', 
+    fontSize: '24px',
+    fontWeight: 'bold',
+  },
+  experimentsHeaderText: {
+    display: 'inline-block',
+  },
+  newExperimentButton: {
+    float: 'right',
+  },
   table: {
     minWidth: 700,
   },
+  editButton: {
+    marginRight: '5px',
+  }
 });
 
 
@@ -51,6 +71,11 @@ export default function ExperimentList() {
     }, []);
 
     return (
+      <div className={classes.root}>
+        <div className={classes.experimentsHeader}>
+          <div className={classes.experimentsHeaderText}>Experiments</div>
+          <Button className={classes.newExperimentButton} component={Link} to={`/experiment`} variant="contained" color="primary">Create Experiment</Button>
+        </div>
         <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="customized table">
                 <TableHead>
@@ -59,7 +84,6 @@ export default function ExperimentList() {
                         <StyledTableCell align="right">Name</StyledTableCell>
                         <StyledTableCell align="right">Percentage</StyledTableCell>
                         <StyledTableCell align="right">Start</StyledTableCell>
-                        <StyledTableCell align="right">Till</StyledTableCell>
                         <StyledTableCell align="right"></StyledTableCell>
                     </TableRow>
                 </TableHead>
@@ -73,8 +97,8 @@ export default function ExperimentList() {
                             <StyledTableCell align="right">{experiment.name}</StyledTableCell>
                             <StyledTableCell align="right">{experiment.percentage}</StyledTableCell>
                             <StyledTableCell align="right">{experiment.created_time}</StyledTableCell>
-                            <StyledTableCell align="right">{experiment.last_active_time}</StyledTableCell>
                             <StyledTableCell align="right">
+                                <Button className={classes.editButton} component={Link} to={`/experiment?experiment=${experiment.name}`} variant="outlined" color="primary">Edit</Button>
                                 <Button component={Link} to={`/performance?experiment=${experiment.name}`} variant="outlined" color="secondary">Performance</Button>
                             </StyledTableCell>
                         </StyledTableRow>
@@ -82,7 +106,8 @@ export default function ExperimentList() {
                   })}
                 </TableBody>
             </Table>
-        </  TableContainer>
+        </TableContainer>
+      </div>
     );  
 }
 
