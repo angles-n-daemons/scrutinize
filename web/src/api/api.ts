@@ -15,6 +15,7 @@ export interface DataPoint {
 export interface VariantDetails {
     variant: string;
     volume: string;
+    unique_users: string;
     duration_ms: string;
     pct_error: string;
 }

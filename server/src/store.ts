@@ -125,9 +125,10 @@ export class PGStore {
         )).rows[0] as Details;
         details.variants = (await this.pool.query(
             `SELECT variant,
+                    COUNT(*) as volume,
+                    COUNT(DISTINCT user_id) AS unique_users,
                     AVG(duration_ms) as duration_ms,
-                    1.0 * SUM(CASE WHEN LENGTH(error) > 0 THEN 1 ELSE 0 END) / COUNT(*) as pct_error,
-                    COUNT(*) as volume
+                    1.0 * SUM(CASE WHEN LENGTH(error) > 0 THEN 1 ELSE 0 END) / COUNT(*) as pct_error
               FROM Treatment
              WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
              GROUP BY variant`,

@@ -100,6 +100,7 @@ export default function PerformanceInfoBar({
             <TableRow>
               <TableCell>Variant</TableCell>
               <TableCell align="right">Volume</TableCell>
+              <TableCell align="right">Unique Users</TableCell>
               <TableCell align="right">Avg Duration (ms)</TableCell>
               <TableCell align="right">% Error</TableCell>
             </TableRow>
@@ -111,6 +112,7 @@ export default function PerformanceInfoBar({
                 {variant.variant}
               </TableCell>
               <TableCell align="right">{variant.volume}</TableCell>
+              <TableCell align="right">{variant.unique_users}</TableCell>
               <TableCell align="right">{parseFloat(variant.duration_ms).toFixed(2)}</TableCell>
               <TableCell align="right">{(parseFloat(variant.pct_error) * 100).toFixed(2)}%</TableCell>
             </TableRow>)

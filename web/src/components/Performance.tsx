@@ -9,7 +9,7 @@ import API, { PerformanceData} from 'api/api'
 const useStyles = makeStyles({
     root: {
         display: 'flex',
-        paddingRight: '15%',
+        paddingRight: '8%',
         paddingLeft: '4%',
         flexDirection: 'column',
     },
