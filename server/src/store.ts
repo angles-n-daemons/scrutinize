@@ -17,6 +17,7 @@ export interface Store {
     healthy: () => Promise<boolean>;
     getExperiments: () => Promise<Experiment[]>;
     createExperiment: (data: Experiment) => Promise<void>;
+    toggleExperimentActive: (data: Experiment) => Promise<void>;
     createTreatment: (data: Treatment) => Promise<void>;
     createMeasurement: (data: Measurement) => Promise<void>;
     upsertMetric: (data: Metric) => Promise<void>;
@@ -40,7 +41,7 @@ export class PGStore {
 
     public async getExperiments(): Promise<Experiment[]> {
 		return (await this.pool.query(
-            `SELECT id, name, percentage, created_time, last_active_time FROM Experiment`
+            `SELECT id, name, percentage, active, created_time, last_active_time FROM Experiment`
         )).rows;
     }
 
@@ -52,7 +53,7 @@ export class PGStore {
             const res = await client.query(
                 `
                 INSERT INTO Experiment(name, percentage, active)
-                VALUES ($1, $2, 0)
+                VALUES ($1, $2, FALSE)
                 RETURNING id
                 `,
                 [experiment.name, experiment.percentage],
@@ -79,6 +80,13 @@ export class PGStore {
         } finally {
             client.release();
         }
+    }
+
+    public async toggleExperimentActive({ id, active }: Experiment): Promise<void> {
+	    await this.pool.query(
+            `UPDATE SET Experiment active=$1 WHERE id=$2`,
+            [active, id],
+        );
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
