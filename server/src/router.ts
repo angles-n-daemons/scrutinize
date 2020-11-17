@@ -49,7 +49,7 @@ export default class Router {
 		router.post('/experiment', this.postExperiment.bind(this));
 		router.post('/treatment', this.postTreatment.bind(this));
 		router.post('/measurement', this.postMeasurement.bind(this));
-		router.get('/metrics/:experiment', this.getMetrics.bind(this));
+		router.get('/metrics', this.getMetrics.bind(this));
 		router.get('/details/:experiment', this.getDetails.bind(this));
 		router.get('/performance/:experiment', this.getPerformance.bind(this));
 		return router;
@@ -91,8 +91,8 @@ export default class Router {
 		res.json({status: 'ok'});
 	}
 
-	private async getMetrics(req: Request, res: Response) {
-		res.json(await this.controller.getMetrics(req.params.experiment || ''));
+	private async getMetrics(_: Request, res: Response) {
+		res.json(await this.controller.getMetrics());
 	}
 
 	private async getDetails(req: Request, res: Response) {

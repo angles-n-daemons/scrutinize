@@ -2,6 +2,7 @@ export interface Experiment {
     id?: number;
     name: string;
     percentage: number;
+    evaluation_criterion?: Metric[];
     created_time?: Date;
     last_active_time?: Date;
 }
@@ -25,8 +26,8 @@ export interface Measurement {
 }
 
 export interface Metric {
+    id?: number;
     name: string;
-    experiment_name: string;
 }
 
 export type Performance = Record<string, MetricData>;
