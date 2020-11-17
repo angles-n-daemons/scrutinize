@@ -18,9 +18,11 @@ const StyledTableCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
+    textAlign: 'left',
   },
   body: {
     fontSize: 14,
+    textAlign: 'left',
   },
 }))(TableCell);
 
@@ -81,8 +83,7 @@ export default function ExperimentList() {
                 <TableHead>
                     <TableRow>
                         <StyledTableCell>Experiment</StyledTableCell>
-                        <StyledTableCell align="right">Name</StyledTableCell>
-                        <StyledTableCell align="right">Percentage</StyledTableCell>
+                        <StyledTableCell align="right">Rollout</StyledTableCell>
                         <StyledTableCell align="right">Start</StyledTableCell>
                         <StyledTableCell align="right"></StyledTableCell>
                     </TableRow>
@@ -91,13 +92,10 @@ export default function ExperimentList() {
                   {experiments.map((experiment) => {
                     return (
                         <StyledTableRow key={experiment.id}>
-                            <StyledTableCell component="th" scope="row">
-                              {experiment.name}
-                            </StyledTableCell>
                             <StyledTableCell align="right">{experiment.name}</StyledTableCell>
-                            <StyledTableCell align="right">{experiment.percentage}</StyledTableCell>
+                            <StyledTableCell align="right">{experiment.percentage}%</StyledTableCell>
                             <StyledTableCell align="right">{experiment.created_time}</StyledTableCell>
-                            <StyledTableCell align="right">
+                            <StyledTableCell align="right" width="240px">
                                 <Button className={classes.editButton} component={Link} to={`/experiment?experiment=${experiment.name}`} variant="outlined" color="primary">Edit</Button>
                                 <Button component={Link} to={`/performance?experiment=${experiment.name}`} variant="outlined" color="secondary">Performance</Button>
                             </StyledTableCell>

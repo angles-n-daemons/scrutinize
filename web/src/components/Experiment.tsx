@@ -1,30 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useHistory } from "react-router-dom";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import BuildIcon from '@material-ui/icons/Build';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-//function Copyright() {
-//  return (
-//    <Typography variant="body2" color="textSecondary" align="center">
-//      {'Copyright © '}
-//      <Link color="inherit" href="https://material-ui.com/">
-//        Your Website
-//      </Link>{' '}
-//      {new Date().getFullYear()}
-//      {'.'}
-//    </Typography>
-//  );
-//}
+import MetricSelect from 'components/experiment/MetricSelect';
+import PercentageSlider from 'components/experiment/PercentageSlider';
+
+import API, { Metric } from 'api/api'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -32,6 +21,8 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    border: '1px black solid',
+    padding: '15px',
   },
   avatar: {
     margin: theme.spacing(1),
@@ -42,76 +33,122 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(3),
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    margin: '8px 0px 12px',
   },
+  evaluationMetricsText: {
+    marginBottom: '4px',
+  },
+  errorField: {
+    width: '100%',
+    textAlign: 'center',
+  }
 }));
 
-export default function Experiment() {
+export default function ExperimentForm() {
   const classes = useStyles();
+  const history = useHistory();
+
+  const [savingValue, setSavingValue] = useState<boolean>(false);
+  const [experimentName, setExperimentName] = useState<string>('');
+  const [rollout, setRollout] = useState<number>(5);
+  const [metrics, setMetrics] = useState<any>([]);
+  const [errorText, setErrorText] = useState<string>('');
+
+  async function submitForm(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingValue(true);
+    try {
+        if (!experimentName) {
+            setErrorText('Must include a name for your experiment');
+            return
+        }
+        const evaluationCriterion = metrics.map((metric: {
+            value: string;
+            label: string;
+        }) => {
+            return {
+                id: metric.value,
+                name: metric.label,
+            };
+        });
+        const userError = await API.saveExperiment({
+            name: experimentName,
+            percentage: rollout,
+            evaluation_criterion: evaluationCriterion,
+        });
+
+        if (userError) {
+            setErrorText(userError);
+        } else {
+            history.push('/');
+        }
+    } catch (e: any) {
+        console.error(e);
+        setErrorText('This page broke :/');
+    } finally {
+        setSavingValue(false);
+    }
+  }
+
+  function handleChangeName(e: React.ChangeEvent<Element>) {
+    const newName = (e.target as HTMLInputElement).value;
+    setExperimentName(newName.replace(/[^0-9a-z_\.]/gi, ''));
+  }
+
+  function handleChangeRollout(_: React.ChangeEvent<{}>, value: number | number[]) {
+    setRollout(value as number);
+  }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
+          <BuildIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign up
+          Experiment
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} noValidate onSubmit={submitForm}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
-                autoComplete="fname"
-                name="firstName"
+                name="experimentName"
                 variant="outlined"
                 required
                 fullWidth
-                id="firstName"
-                label="First Name"
+                id="experimentName"
+                label="Experiment Name"
                 autoFocus
+                disabled={savingValue}
+                value={experimentName}
+                onChange={handleChangeName}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
-              />
+              <Typography component="div" variant="body2" color="textSecondary">
+                Permitted: letters, numbers, periods and underscores
+              </Typography>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-              />
+              <Typography component="div" variant="body1">
+                Rollout
+              </Typography>
+              <PercentageSlider
+                disabled={savingValue}
+                valueLabelDisplay="auto"
+                aria-label="percentage slider"
+                onChange={handleChangeRollout}
+                defaultValue={5} />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
+              <Typography className={classes.evaluationMetricsText} component="div" variant="body1">
+                Evaluation Metrics
+              </Typography>
+               <MetricSelect setMetrics={setMetrics} />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
-              />
+              <Typography className={classes.errorField} component="div" variant="body2" color="error">
+                {errorText ? errorText : '\u00A0'}
+              </Typography>
             </Grid>
           </Grid>
           <Button
@@ -120,19 +157,12 @@ export default function Experiment() {
             variant="contained"
             color="primary"
             className={classes.submit}
+            disabled={savingValue}
           >
-            Sign Up
+            Save
           </Button>
-          <Grid container justify="flex-end">
-            <Grid item>
-              <Link href="#" variant="body2">
-                Already have an account? Sign in
-              </Link>
-            </Grid>
-          </Grid>
         </form>
       </div>
     </Container>
   );
 }
-
