@@ -11,6 +11,8 @@ import {
     DataPoint,
 } from './model';
 
+import { UserError } from './middleware/errors';
+
 export interface Store {
     healthy: () => Promise<boolean>;
     getExperiments: () => Promise<Experiment[]>;
@@ -18,7 +20,7 @@ export interface Store {
     createTreatment: (data: Treatment) => Promise<void>;
     createMeasurement: (data: Measurement) => Promise<void>;
     upsertMetric: (data: Metric) => Promise<void>;
-    getMetrics: (experiment: string) => Promise<Metric[]>;
+    getMetrics: () => Promise<Metric[]>;
     getDetails: (experiment: string) => Promise<Details>;
     getPerformance: (experiment: string) => Promise<Performance>;
 }
@@ -43,13 +45,40 @@ export class PGStore {
     }
 
     public async createExperiment(experiment: Experiment): Promise<void> {
-        await this.pool.query(
-            `
-            INSERT INTO Experiment(name, percentage)
-            VALUES ($1, $2)
-            `,
-            [experiment.name, experiment.percentage],
-        );
+        // TODO (brian): Handle case with duplicate name
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const res = await client.query(
+                `
+                INSERT INTO Experiment(name, percentage, active)
+                VALUES ($1, $2, 0)
+                RETURNING id
+                `,
+                [experiment.name, experiment.percentage],
+            );
+            // NOTE: pg-node prepared statements don't support execution for multiple values i think
+            for (const metric of experiment.evaluation_criterion || []) {
+                await client.query(
+                    `
+                    INSERT INTO EvaluationCriterion (experiment_id, metric_id)
+                    VALUES ($1, $2)
+                    `,
+                    [res.rows[0].id, metric.id],
+                );
+            }
+            await client.query('COMMIT');
+        } catch (e: any) {
+            if (e instanceof Error) {
+                if (e.message.indexOf('unique constraint')) {
+                    e = UserError(e, 'Experiment name taken, please choose a different one');
+                }
+            }
+            await client.query('ROLLBACK');
+            throw(e);
+        } finally {
+            client.release();
+        }
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
@@ -106,10 +135,9 @@ export class PGStore {
         );
     }
 
-    public async getMetrics(experiment: string): Promise<Metric[]> {
+    public async getMetrics(): Promise<Metric[]> {
 		return (await this.pool.query(
-            `SELECT name FROM Metric WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)`,
-            [experiment],
+            `SELECT id, name FROM Metric`,
         )).rows;
     }
 
