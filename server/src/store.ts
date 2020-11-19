@@ -41,12 +41,15 @@ export class PGStore {
 
     public async getExperiments(): Promise<Experiment[]> {
 		return (await this.pool.query(
-            `SELECT id, name, percentage, active, created_time, last_active_time FROM Experiment`
+            `
+            SELECT id, name, percentage, active, created_time, last_active_time
+            FROM Experiment
+            ORDER BY id DESC
+            `
         )).rows;
     }
 
     public async createExperiment(experiment: Experiment): Promise<void> {
-        // TODO (brian): Handle case with duplicate name
         const client = await this.pool.connect();
         try {
             await client.query('BEGIN');
@@ -83,8 +86,9 @@ export class PGStore {
     }
 
     public async toggleExperimentActive({ id, active }: Experiment): Promise<void> {
+        console.log(id, active);
 	    await this.pool.query(
-            `UPDATE SET Experiment active=$1 WHERE id=$2`,
+            `UPDATE Experiment SET active=$1 WHERE id=$2`,
             [active, id],
         );
     }

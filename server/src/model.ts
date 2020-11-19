@@ -2,7 +2,7 @@ export interface Experiment {
     id?: number;
     name: string;
     percentage: number;
-    active: number;
+    active: boolean;
     evaluation_criterion?: Metric[];
     created_time?: Date;
     last_active_time?: Date;

@@ -25,6 +25,10 @@ export default class Controller {
         await this.store.createExperiment(experiment);
     }
 
+    public async toggleExperimentActive(experiment: Experiment): Promise<void> {
+        await this.store.toggleExperimentActive(experiment);
+    }
+
     public async createTreatment(treatment: Treatment): Promise<void> {
         await this.store.createTreatment(treatment);
     }

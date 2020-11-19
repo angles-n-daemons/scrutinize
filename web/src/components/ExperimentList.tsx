@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import Switch from '@material-ui/core/Switch';
 
 import { Link } from "react-router-dom";
 
@@ -59,18 +60,34 @@ const useStyles = makeStyles({
   }
 });
 
+const TOGGLE_ID_PREFIX = 'active-toggle-';
+
 
 export default function ExperimentList() {
     const classes = useStyles();
 
     const [experiments, setExperiments] = useState<any[]>([]);
+
     useEffect(() => {
         async function getExperiments() {
-            const response = await API.getExperiments();
-            setExperiments(await response.json());
+            setExperiments(await API.getExperiments());
         }
         getExperiments();
     }, []);
+
+    function handleSwitchChange(e: React.SyntheticEvent) {
+        const element = (e.target as HTMLInputElement)
+        const idxStr = element.id.replace(TOGGLE_ID_PREFIX, '');
+        const idx = parseInt(idxStr);
+        experiments[idx].active = element.checked;
+        const experiment = {
+            ...experiments[idx],
+            active: element.checked,
+        };
+        experiments.splice(idx, 1, experiment);
+        setExperiments([...experiments]);
+        API.toggleExperimentActive(experiment);
+    }
 
     return (
       <div className={classes.root}>
@@ -85,18 +102,27 @@ export default function ExperimentList() {
                         <StyledTableCell>Experiment</StyledTableCell>
                         <StyledTableCell align="right">Rollout</StyledTableCell>
                         <StyledTableCell align="right">Start</StyledTableCell>
-                        <StyledTableCell align="right"></StyledTableCell>
+                        <StyledTableCell align="right">Active</StyledTableCell>
+                        <StyledTableCell align="right">Performance</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                  {experiments.map((experiment) => {
+                  {experiments.map((experiment, idx) => {
                     return (
                         <StyledTableRow key={experiment.id}>
                             <StyledTableCell align="right">{experiment.name}</StyledTableCell>
                             <StyledTableCell align="right">{experiment.percentage}%</StyledTableCell>
                             <StyledTableCell align="right">{experiment.created_time}</StyledTableCell>
-                            <StyledTableCell align="right" width="240px">
-                                <Button className={classes.editButton} component={Link} to={`/experiment?experiment=${experiment.name}`} variant="outlined" color="primary">Edit</Button>
+                            <StyledTableCell align="right">
+                              <Switch
+                                checked={experiment.active}
+                                onChange={handleSwitchChange}
+                                name={`experiment-active-toggle-${idx}`}
+                                id={`${TOGGLE_ID_PREFIX}${idx}`}
+                                inputProps={{ 'aria-label': 'secondary checkbox' }}
+                              />
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
                                 <Button component={Link} to={`/performance?experiment=${experiment.name}`} variant="outlined" color="secondary">Performance</Button>
                             </StyledTableCell>
                         </StyledTableRow>

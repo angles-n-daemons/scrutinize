@@ -83,7 +83,7 @@ export default class Router {
 	}
 
     private async postExperimentActive(req: Request, res: Response) {
-		await this.controller.createMeasurement(req.body);
+		await this.controller.toggleExperimentActive(req.body);
 		res.json({status: 'ok'});
     }
 

@@ -4,6 +4,7 @@ export interface Experiment {
     id?: number;
     name: string;
     percentage: number;
+    active?: boolean;
     evaluation_criterion: Metric[];
 }
 
@@ -42,7 +43,11 @@ export interface ExperimentDetails {
 }
 
 class API {
-    async saveExperiment(experiment: Experiment) {
+    async getExperiments(search: string=''): Promise<Experiment[]> { 
+        return (await (await fetch(`${BASE_PATH}/experiment`)).json()) as Experiment[];
+    }
+
+    async saveExperiment(experiment: Experiment): Promise<string> {
         console.log('saving')
         const res = await fetch(`${BASE_PATH}/experiment`, {
             method: 'POST',
@@ -62,8 +67,14 @@ class API {
         return '';
     }
 
-    async getExperiments(search: string='') { 
-        return await fetch(`${BASE_PATH}/experiment`);
+    async toggleExperimentActive(experiment: Experiment) {
+        const res = await fetch(`${BASE_PATH}/experiment/active`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(experiment),
+        });
     }
 
     async getMetrics(): Promise<Metric[]> {
