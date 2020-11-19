@@ -1,5 +1,6 @@
-import unittest
 import asyncio
+import time
+import unittest
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, ANY
 
@@ -168,6 +169,42 @@ class TestExperiment(unittest.TestCase):
             'SOME_OTHER_EXP': {'percentage': 50, 'active': True},
         })
         assert asyncio.run(scrutinize._get_variant('testexp', 'johnny')) == (False, 'control')
+
+    def test_get_experiments_use_cached(self):
+        scrutinize = ScrutinizeClient()
+        scrutinize.experiments = {'blah': {'name': 'blah'}}
+        scrutinize.experiments_ttl = 1000000
+        scrutinize.experiments_pull_time = time.time()
+        scrutinize.get = AsyncMock(return_value=[{'name': 'hi'}])
+        result = asyncio.run(scrutinize.get_experiments())
+
+        assert result == {'blah': {'name': 'blah'}}
+        assert result == scrutinize.experiments
+        scrutinize.get.assert_not_called()
+
+    def test_get_experiments_pull_on_none(self):
+        scrutinize = ScrutinizeClient()
+        scrutinize.experiments = None
+        scrutinize.experiments_ttl = 1000000
+        scrutinize.experiments_pull_time = time.time()
+        scrutinize.get = AsyncMock(return_value=[{'name': 'hi'}])
+        result = asyncio.run(scrutinize.get_experiments())
+
+        assert result == {'hi': {'name': 'hi'}}
+        assert result == scrutinize.experiments
+        scrutinize.get.assert_called_with('/experiment')
+
+    def test_get_experiments_timeout(self):
+        scrutinize = ScrutinizeClient()
+        scrutinize.experiments = {'blah': {'name': 'blah'}}
+        scrutinize.experiments_ttl = 500
+        scrutinize.experiments_pull_time = time.time() - 600
+        scrutinize.get = AsyncMock(return_value=[{'name': 'hi'}])
+        result = asyncio.run(scrutinize.get_experiments())
+
+        assert result == {'hi': {'name': 'hi'}, 'blah': {'name': 'blah'}}
+        assert result == scrutinize.experiments
+        scrutinize.get.assert_called_with('/experiment')
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ class ScrutinizeClient:
         experiments_ttl: int=300,
     ):
         self.base_url = f'{protocol}://{host}/api/v1'
-        self.experiments = {}
+        self.experiments = None
         self.experiments_ttl = experiments_ttl
         self.experiments_pull_time = 0
 
@@ -74,10 +74,15 @@ class ScrutinizeClient:
 
     async def get_experiments(self):
         now = int(time.time())
-        if now - self.experiments_pull_time > self.experiments_ttl:
+        should_pull = self.experiments is None or (now - self.experiments_pull_time > self.experiments_ttl)
+        if should_pull:
             experiments = await self.get('/experiment')
+
+            if self.experiments is None:
+                self.experiments = {}
             for experiment in experiments:
                 self.experiments[experiment['name']] = experiment
+
             self.experiments_pull_time = now
         return self.experiments
 
