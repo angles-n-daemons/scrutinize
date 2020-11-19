@@ -13,23 +13,25 @@ class TestExperiment(unittest.TestCase):
             'testexp': {'percentage': 50, 'active': True},
         })
 
-        control = MagicMock()
-        variant = MagicMock()
+        control = MagicMock(return_value=5)
+        variant = MagicMock(return_value=10)
 
         tests = [
-            ['lisaa', control],
-            ['garyoi', variant],
-            ['eyjohn', control],
-            ['joan', variant],
+            ['lisaa', False, 5, control],
+            ['garyoi', True, 10, variant],
+            ['eyjohn', False, 5, control],
+            ['joan', True, 10, variant],
         ]
 
-        for i, (user_id, var) in enumerate(tests):
-            asyncio.run(scrutinize.call(
+        for i, (user_id, is_experiment, expected, var) in enumerate(tests):
+            call_is_experiment, result = asyncio.run(scrutinize.call(
                 'testexp',
                 user_id,
                 lambda: control(i),
                 lambda: variant(i),
             ))
+            assert call_is_experiment == is_experiment
+            assert result == expected
 
             var.assert_called_with(i)
 
