@@ -124,7 +124,7 @@ export class PGStore {
 
     public async createMeasurement(measurement: Measurement): Promise<void> {
         // Find treatments to be applied based on time and experiment criterion
-        const { metric_name, value, user_id, experiment_name, created_time } = measurement;
+        const { metric_name, value, user_id, created_time } = measurement;
 		await this.pool.query(
             `
             WITH SelectedTreatments AS (
@@ -150,11 +150,10 @@ export class PGStore {
               JOIN SelectedTreatments st ON st.id=t.id
               JOIN experiment e ON t.experiment_id = e.id
              WHERE t.user_id=$5
-               AND e.name=$6
               ORDER BY t.user_id, t.created_time DESC
               LIMIT 1
             `,
-            [metric_name, value.toString(), user_id, created_time, user_id, experiment_name],
+            [metric_name, value.toString(), user_id, created_time, user_id],
         );
     }
 

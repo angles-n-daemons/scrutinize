@@ -3,21 +3,15 @@ import asyncio
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, ANY
 
-from scrutinize import Experiment
+from scrutinize import ScrutinizeClient
 
-
-class TestClient(unittest.TestCase):
-
-    def test_experiments(self):
-        pass
 
 class TestExperiment(unittest.TestCase):
     def test_call(self):
-        client = AsyncMock()
-        client.get_experiments.return_value = {
-            'testexp': {'percentage': 50},
-        }
-        experiment = Experiment('testexp', client)
+        scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value={
+            'testexp': {'percentage': 50, 'active': True},
+        })
 
         control = MagicMock()
         variant = MagicMock()
@@ -30,7 +24,8 @@ class TestExperiment(unittest.TestCase):
         ]
 
         for i, (user_id, var) in enumerate(tests):
-            asyncio.run(experiment.call(
+            asyncio.run(scrutinize.call(
+                'testexp',
                 user_id,
                 lambda: control(i),
                 lambda: variant(i),
@@ -39,18 +34,19 @@ class TestExperiment(unittest.TestCase):
             var.assert_called_with(i)
 
     def test_call_exception(self):
-        client = AsyncMock()
-        client.get_experiments.return_value = {
-            'testexp': {'percentage': 50},
-        }
-        experiment = Experiment('testexp', client)
-        experiment._get_variant = AsyncMock(return_value=(False, 'control'))
+        scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value = {
+            'testexp': {'percentage': 50, 'active': True},
+        })
+        scrutinize._get_variant = AsyncMock(return_value=(False, 'control'))
+        scrutinize.create_treatment = AsyncMock()
 
         def exception_raiser():
             raise(Exception('im an error'))
 
         try:
-            asyncio.run(experiment.call(
+            asyncio.run(scrutinize.call(
+                'testexp',
                 'fake_person',
                 exception_raiser,
                 2,
@@ -59,8 +55,8 @@ class TestExperiment(unittest.TestCase):
             # expect it to raise, just want to make sure treatment created
             pass
 
-        # We only really care about the duration_ms parameter
-        client.create_treatment.assert_called_with(
+        # We only really care about the error parameter
+        scrutinize.create_treatment.assert_called_with(
             'testexp',
             'fake_person',
             'control',
@@ -69,12 +65,13 @@ class TestExperiment(unittest.TestCase):
         )
 
     def test_call_duration(self):
-        client = AsyncMock()
-        experiment = Experiment('testexp', client)
-        experiment._get_variant = AsyncMock(return_value=(False, 'control'))
+        scrutinize = ScrutinizeClient()
+        scrutinize._get_variant = AsyncMock(return_value=(False, 'control'))
+        scrutinize.create_treatment = AsyncMock()
 
         get_time = MagicMock(side_effect=[5, 10])
-        asyncio.run(experiment.call(
+        asyncio.run(scrutinize.call(
+            'testexp',
             'fake_person',
             1,
             2,
@@ -82,7 +79,7 @@ class TestExperiment(unittest.TestCase):
         ))
 
         # We only really care about the duration_ms parameter
-        client.create_treatment.assert_called_with(
+        scrutinize.create_treatment.assert_called_with(
             'testexp',
             'fake_person',
             'control',
@@ -91,14 +88,14 @@ class TestExperiment(unittest.TestCase):
         )
 
     def test_resolve_func(self):
-        experiment = Experiment('testexp', AsyncMock())
-        assert asyncio.run(experiment._resolve(lambda: 26)) == 26
+        scrutinize = ScrutinizeClient()
+        assert asyncio.run(scrutinize._resolve(lambda: 26)) == 26
 
     def test_resolve_async(self):
-        experiment = Experiment('testexp', AsyncMock())
+        scrutinize = ScrutinizeClient()
         async def variant():
             return 25
-        assert asyncio.run(experiment._resolve(variant)) == 25
+        assert asyncio.run(scrutinize._resolve(variant)) == 25
 
     def test_resolve_literal(self):
         tests = [
@@ -110,10 +107,10 @@ class TestExperiment(unittest.TestCase):
             Decimal(52),
             None,
         ]
-        experiment = Experiment('testexp', AsyncMock())
+        scrutinize = ScrutinizeClient()
 
         for expected in tests:
-            assert asyncio.run(experiment._resolve(expected)) == expected
+            assert asyncio.run(scrutinize._resolve(expected)) == expected
 
     def test_get_variant(self):
         tests = [
@@ -130,37 +127,45 @@ class TestExperiment(unittest.TestCase):
             ['limson', False],
             ['fiona', True],
         ]
-        client = AsyncMock()
-        client.get_experiments.return_value = {
-            'testexp': {'percentage': 50},
-        }
-
-        experiment = Experiment('testexp', client)
+        scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value={
+            'testexp': {'percentage': 50, 'active': True},
+        })
 
         for user_id, expected in tests:
-            treatment, _ = asyncio.run(experiment._get_variant(user_id))
+            treatment, _ = asyncio.run(scrutinize._get_variant('testexp', user_id))
             assert treatment == expected
 
     def test_get_variant_differs_with_experiment(self):
-        client = AsyncMock()
-        client.get_experiments.return_value = {
-            'testexp': {'percentage': 50},
-            'otherexp': {'percentage': 50},
-        }
+        scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value={
+            'testexp': {'percentage': 50, 'active': True},
+            'otherexp': {'percentage': 50, 'active': True},
+        })
 
-        experiment1 = Experiment('testexp', client)
-        experiment2 = Experiment('otherexp', client)
 
         user_id = 'sally'
-        assert asyncio.run(experiment1._get_variant(user_id)) != asyncio.run(experiment2._get_variant(user_id))
+        assert asyncio.run(scrutinize._get_variant('testexp', user_id)) != asyncio.run(scrutinize._get_variant('otherexp', user_id))
+
+    def test_get_variant_active_param(self):
+        scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value={
+            'testexp': {'percentage': 50, 'active': True},
+            'otherexp': {'percentage': 50, 'active': False},
+        })
+
+        # id lands in exp group for both experiments
+        user_id='laura'
+        assert asyncio.run(scrutinize._get_variant('testexp', user_id))[0]
+        assert not asyncio.run(scrutinize._get_variant('otherexp', user_id))[0]
+
 
     def test_get_variant_experiment_doesnt_exist(self):
-        client = AsyncMock()
-        client.get_experiments.return_value = {
-            'SOME_OTHER_EXP': {'percentage': 50},
-        }
-        experiment1 = Experiment('NON_EXISTENT_EXP', client)
-        assert asyncio.run(experiment1._get_variant('johnny')) == (False, 'control')
+        scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value={
+            'SOME_OTHER_EXP': {'percentage': 50, 'active': True},
+        })
+        assert asyncio.run(scrutinize._get_variant('testexp', 'johnny')) == (False, 'control')
 
 
 if __name__ == '__main__':

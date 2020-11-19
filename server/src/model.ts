@@ -22,7 +22,6 @@ export interface Measurement {
     value: number;
     treatment_id: number;
     variant: 'control' | 'experiment';
-    experiment_name: string;
     created_time?: string;
 }
 
