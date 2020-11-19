@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -84,7 +83,7 @@ export default function ExperimentList() {
             ...experiments[idx],
             active: element.checked,
         };
-        experiments.splice(idx, 1, experiment);
+        experiments[idx] = experiment;
         setExperiments([...experiments]);
         API.toggleExperimentActive(experiment);
     }

@@ -123,9 +123,19 @@ export class PGStore {
     }
 
     public async createMeasurement(measurement: Measurement): Promise<void> {
+        // Find treatments to be applied based on time and experiment criterion
         const { metric_name, value, user_id, experiment_name, created_time } = measurement;
 		await this.pool.query(
             `
+            WITH SelectedTreatments AS (
+                SELECT t.user_id, t.variant, MAX(t.id) as id
+                  FROM TREATMENT t
+                  JOIN Experiment e ON e.id=t.experiment_id
+                  JOIN EvaluationCriterion ec ON ec.experiment_id=e.id
+                  JOIN Metric m ON m.id = ec.metric_id
+                 WHERE m.name=$1
+                 GROUP BY 1, 2
+            )
             INSERT INTO Measurement(
                 experiment_id,
                 treatment_id,
@@ -137,6 +147,7 @@ export class PGStore {
             )
             SELECT e.id, t.id, $1, $2, $3, t.variant, COALESCE($4, CURRENT_TIMESTAMP)
               FROM Treatment t
+              JOIN SelectedTreatments st ON st.id=t.id
               JOIN experiment e ON t.experiment_id = e.id
              WHERE t.user_id=$5
                AND e.name=$6
