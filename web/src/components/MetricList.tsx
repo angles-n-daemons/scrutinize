@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -8,9 +7,6 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Switch from '@material-ui/core/Switch';
-
-import { Link } from "react-router-dom";
 
 import API from 'api/api'
 import MetricForm from 'components/metrics/MetricForm';
@@ -55,9 +51,6 @@ const useStyles = makeStyles({
   table: {
     minWidth: 700,
   },
-  editButton: {
-    marginRight: '5px',
-  }
 });
 
 
@@ -66,10 +59,10 @@ export default function MetricList() {
 
     const [metrics, setMetrics] = useState<any[]>([]);
 
+    async function getMetrics() {
+        setMetrics(await API.getMetrics());
+    }
     useEffect(() => {
-        async function getMetrics() {
-            setMetrics(await API.getMetrics());
-        }
         getMetrics();
     }, []);
 
@@ -78,7 +71,7 @@ export default function MetricList() {
         <div className={classes.metricsHeader}>
           <div className={classes.metricsHeaderText}>Metric</div>
           <div className={classes.newMetricButton}>
-            <MetricForm />
+            <MetricForm updateMetrics={getMetrics} />
           </div>
         </div>
         <TableContainer component={Paper}>

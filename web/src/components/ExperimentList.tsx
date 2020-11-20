@@ -12,7 +12,7 @@ import Switch from '@material-ui/core/Switch';
 
 import { Link } from "react-router-dom";
 
-import API, { Experiment } from 'api/api';
+import API from 'api/api';
 import ExperimentForm from 'components/experiment/ExperimentForm';
 
 const StyledTableCell = withStyles((theme) => ({

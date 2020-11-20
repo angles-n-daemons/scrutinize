@@ -28,6 +28,7 @@ export interface Measurement {
 export interface Metric {
     id?: number;
     name: string;
+    type?: 'binomial' | 'continuous' | 'count';
 }
 
 export type Performance = Record<string, MetricData>;

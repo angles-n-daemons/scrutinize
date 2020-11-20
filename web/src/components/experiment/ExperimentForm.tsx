@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import { useHistory } from "react-router-dom";
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
-import BuildIcon from '@material-ui/icons/Build';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -16,9 +12,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import MetricSelect from 'components/experiment/MetricSelect';
 import PercentageSlider from 'components/experiment/PercentageSlider';
 
-import API, { Experiment } from 'api/api';
+import API from 'api/api';
 
 const useStyles = makeStyles((theme) => ({
+  dialogContent: {
+    overflowY: 'visible',
+  },
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(3),
@@ -39,7 +38,6 @@ export default function ExperimentForm({
     updateExperiments,
 }: {updateExperiments: () => Promise<void>}) {
   const classes = useStyles();
-  const history = useHistory();
 
   const [open, setOpen] = useState(false);
   const [savingValue, setSavingValue] = useState<boolean>(false);
@@ -81,9 +79,10 @@ export default function ExperimentForm({
 
         if (userError) {
             setErrorText(userError);
+        } else {
+            setOpen(false);
+            updateExperiments();
         }
-        setOpen(false);
-        updateExperiments();
     } catch (e: any) {
         console.error(e);
         setErrorText('This page broke :/');
@@ -108,7 +107,7 @@ export default function ExperimentForm({
       </Button>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Create Experiment</DialogTitle>
-        <DialogContent>
+        <DialogContent className={classes.dialogContent}>
           <form className={classes.form} noValidate onSubmit={submitForm}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -157,15 +156,15 @@ export default function ExperimentForm({
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={savingValue}
-              onClick={submitForm}
-            >
-              Save
-            </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={savingValue}
+            onClick={submitForm}
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

@@ -20,6 +20,7 @@ export interface Store {
     toggleExperimentActive: (data: Experiment) => Promise<void>;
     createTreatment: (data: Treatment) => Promise<void>;
     createMeasurement: (data: Measurement) => Promise<void>;
+    createMetric: (data: Metric) => Promise<void>;
     upsertMetric: (data: Metric) => Promise<void>;
     getMetrics: () => Promise<Metric[]>;
     getDetails: (experiment: string) => Promise<Details>;
@@ -110,6 +111,26 @@ export class PGStore {
         );
     }
 
+    public async createMetric(metric: Metric): Promise<void> {
+        const { name, type } = metric;
+        try {
+            await this.pool.query(
+                `
+                INSERT INTO Metric (name, type)
+                VALUES ($1, $2)
+                `,
+                [name, type],
+            );
+        } catch (e: any) {
+            if (e instanceof Error) {
+                if (e.message.indexOf('unique constraint')) {
+                    e = UserError(e, 'Metric name taken, please choose a different one');
+                }
+            }
+            throw(e);
+        }
+    }
+
     public async upsertMetric(metric: Metric): Promise<void> {
         const { name } = metric;
 		await this.pool.query(
@@ -159,7 +180,7 @@ export class PGStore {
 
     public async getMetrics(): Promise<Metric[]> {
 		return (await this.pool.query(
-            `SELECT id, name FROM Metric`,
+            `SELECT id, name, type FROM Metric`,
         )).rows;
     }
 

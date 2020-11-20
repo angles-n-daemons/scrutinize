@@ -9,8 +9,9 @@ export interface Experiment {
 }
 
 export interface Metric {
-    id: number;
+    id?: number;
     name: string;
+    type?: 'binomial' | 'continuous' | 'count';
 }
 
 export interface PerformanceData {
@@ -48,7 +49,6 @@ class API {
     }
 
     async saveExperiment(experiment: Experiment): Promise<string> {
-        console.log('saving')
         const res = await fetch(`${BASE_PATH}/experiment`, {
             method: 'POST',
             headers: {
@@ -78,7 +78,26 @@ class API {
     }
 
     async getMetrics(): Promise<Metric[]> {
-        return (await fetch(`${BASE_PATH}/metrics`)).json();
+        return (await fetch(`${BASE_PATH}/metric`)).json();
+    }
+
+    async saveMetric(metric: Metric): Promise<string> {
+        const res = await fetch(`${BASE_PATH}/metric`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(metric),
+        });
+        if (res.status > 399) {
+            const data = await res.json()
+            if ('userError' in data) {
+                return data['userError'];
+            } else {
+                return 'Unknown server error';
+            }
+        }
+        return '';
     }
 
     async getDetails(experiment: string): Promise<ExperimentDetails> {

@@ -45,6 +45,11 @@ export default class Controller {
         return await this.store.getMetrics();
     }
 
+    public async createMetric(metric: Metric): Promise<void> {
+        await this.store.createMetric(metric);
+    }
+
+
     public async getDetails(experiment: string): Promise<Details> {
         return await this.store.getDetails(experiment);
     }
