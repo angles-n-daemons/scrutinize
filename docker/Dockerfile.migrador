@@ -1,0 +1,13 @@
+FROM golang:1.15
+
+WORKDIR /migrations
+
+RUN go get -u github.com/pressly/goose/cmd/goose
+
+RUN apt-get update && apt-get install netcat -y
+
+COPY ./db ./db
+
+COPY ./docker/migrate_db.sh ./
+
+CMD ["./migrate_db.sh"]
