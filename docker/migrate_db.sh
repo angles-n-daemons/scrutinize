@@ -10,4 +10,4 @@ while ! nc -z ${HOST} ${PORT}; do
   sleep 1
 done
 
-goose -dir db postgres "host=${HOST} user=${USER} dbname=${DB} password=${PASSWORD} sslmode=disable" up
+goose -dir db postgres "host=${HOST} port=${PORT} user=${USER} dbname=${DB} password=${PASSWORD} sslmode=disable" up
