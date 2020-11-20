@@ -12,7 +12,8 @@ import Switch from '@material-ui/core/Switch';
 
 import { Link } from "react-router-dom";
 
-import API from 'api/api'
+import API, { Experiment } from 'api/api';
+import ExperimentForm from 'components/experiment/ExperimentForm';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -67,10 +68,10 @@ export default function ExperimentList() {
 
     const [experiments, setExperiments] = useState<any[]>([]);
 
+    async function getExperiments() {
+        setExperiments(await API.getExperiments());
+    }
     useEffect(() => {
-        async function getExperiments() {
-            setExperiments(await API.getExperiments());
-        }
         getExperiments();
     }, []);
 
@@ -92,7 +93,9 @@ export default function ExperimentList() {
       <div className={classes.root}>
         <div className={classes.experimentsHeader}>
           <div className={classes.experimentsHeaderText}>Experiments</div>
-          <Button className={classes.newExperimentButton} component={Link} to={`/experiment`} variant="contained" color="primary">Create Experiment</Button>
+          <div className={classes.newExperimentButton}>
+            <ExperimentForm updateExperiments={getExperiments}/>
+          </div>
         </div>
         <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="customized table">

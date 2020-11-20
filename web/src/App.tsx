@@ -22,7 +22,7 @@ import {
 } from "react-router-dom";
 
 import ExperimentList from './components/ExperimentList';
-import Experiment from './components/Experiment';
+import MetricList from './components/MetricList';
 import PerformancePage from './components/Performance';
 
 const drawerWidth = 240;
@@ -99,12 +99,7 @@ export default function App() {
               <ExperimentList />
             </Route>
             <Route exact path="/metrics">
-              <div>TBD Metrics Page
-                <p>Should hold the information about what metrics exist, volume of them and what kind (binomial, continuous, etc)</p>
-              </div>
-            </Route>
-            <Route path="/experiment">
-              <Experiment />
+              <MetricList />
             </Route>
             <Route path="/performance">
               <PerformancePage />
