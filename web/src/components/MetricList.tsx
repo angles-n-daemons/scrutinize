@@ -42,7 +42,7 @@ const useStyles = makeStyles({
     paddingLeft: '4%',
   },
   metricsHeader: {
-    padding: '20px 0px 27px 0px', 
+    padding: '20px 0px 27px 0px',
     fontSize: '24px',
     fontWeight: 'bold',
   },

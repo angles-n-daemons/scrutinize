@@ -134,6 +134,6 @@ export default function ExperimentList() {
             </Table>
         </TableContainer>
       </div>
-    );  
+    );
 }
 
