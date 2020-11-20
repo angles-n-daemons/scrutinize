@@ -68,7 +68,7 @@ class API {
     }
 
     async toggleExperimentActive(experiment: Experiment) {
-        const res = await fetch(`${BASE_PATH}/experiment/active`, {
+        await fetch(`${BASE_PATH}/experiment/active`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

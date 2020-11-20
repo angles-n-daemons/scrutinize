@@ -13,7 +13,7 @@ import Container from '@material-ui/core/Container';
 import MetricSelect from 'components/experiment/MetricSelect';
 import PercentageSlider from 'components/experiment/PercentageSlider';
 
-import API, { Metric } from 'api/api'
+import API from 'api/api'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -92,7 +92,7 @@ export default function ExperimentForm() {
 
   function handleChangeName(e: React.ChangeEvent<Element>) {
     const newName = (e.target as HTMLInputElement).value;
-    setExperimentName(newName.replace(/[^0-9a-z_\.]/gi, ''));
+    setExperimentName(newName.replace(/[^0-9a-z_.]/gi, ''));
   }
 
   function handleChangeRollout(_: React.ChangeEvent<{}>, value: number | number[]) {

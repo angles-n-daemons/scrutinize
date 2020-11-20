@@ -13,11 +13,6 @@ import Typography from '@material-ui/core/Typography';
 
 import API, { ExperimentDetails} from 'api/api'
 
-function prettyFormatDate(ds: string): string {
-    const d = new Date(ds);
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
-}
-
 const useStyles = makeStyles({
   root: {
 	marginTop: '30px',
@@ -75,7 +70,7 @@ export default function PerformanceInfoBar({
       }
       getDetails();
   }, [experiment]);
-  const { name, percentage, active, created_time, last_active_time } = experimentDetails;
+  const { name, percentage, active } = experimentDetails;
   return (
     <div className={classes.root}>
       <Card className={classes.detailsCard} variant="outlined">

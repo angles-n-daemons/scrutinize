@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Select, { ValueType, OptionTypeBase, ActionMeta } from 'react-select';
+import Select, { ValueType, ActionMeta } from 'react-select';
 
 import API from 'api/api'
 
