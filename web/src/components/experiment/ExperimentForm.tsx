@@ -15,6 +15,9 @@ import PercentageSlider from 'components/experiment/PercentageSlider';
 import API from 'api/api';
 
 const useStyles = makeStyles((theme) => ({
+  dialog: {
+    overflowY: 'visible',
+  },
   dialogContent: {
     overflowY: 'visible',
   },
@@ -105,7 +108,7 @@ export default function ExperimentForm({
       <Button variant="contained" color="primary" onClick={handleClickOpen}>
         Create Experiment
       </Button>
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog className={classes.dialog} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Create Experiment</DialogTitle>
         <DialogContent className={classes.dialogContent}>
           <form className={classes.form} noValidate onSubmit={submitForm}>

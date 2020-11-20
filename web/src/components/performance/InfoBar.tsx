@@ -108,8 +108,8 @@ export default function PerformanceInfoBar({
               </TableCell>
               <TableCell align="right">{variant.unique_users}</TableCell>
               <TableCell align="right">{variant.volume}</TableCell>
-              <TableCell align="right">{parseFloat(variant.duration_ms).toFixed(2)}</TableCell>
               <TableCell align="right">{(parseFloat(variant.pct_error) * 100).toFixed(2)}%</TableCell>
+              <TableCell align="right">{parseFloat(variant.duration_ms).toFixed(2)}</TableCell>
             </TableRow>)
           })}
           </TableBody>
