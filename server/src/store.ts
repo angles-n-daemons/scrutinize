@@ -75,7 +75,7 @@ export class PGStore {
             await client.query('COMMIT');
         } catch (e: any) {
             if (e instanceof Error) {
-                if (e.message.indexOf('unique constraint')) {
+                if (e.message.indexOf('unique constraint') !== -1) {
                     e = UserError(e, 'Experiment name taken, please choose a different one');
                 }
             }
@@ -87,7 +87,6 @@ export class PGStore {
     }
 
     public async toggleExperimentActive({ id, active }: Experiment): Promise<void> {
-        console.log(id, active);
 	    await this.pool.query(
             `UPDATE Experiment SET active=$1 WHERE id=$2`,
             [active, id],

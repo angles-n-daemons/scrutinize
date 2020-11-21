@@ -101,7 +101,7 @@ export default function ExperimentList() {
             <Table className={classes.table} aria-label="customized table">
                 <TableHead>
                     <TableRow>
-                        <StyledTableCell>Experiment</StyledTableCell>
+                        <StyledTableCell>Name</StyledTableCell>
                         <StyledTableCell align="right">Rollout</StyledTableCell>
                         <StyledTableCell align="right">Start</StyledTableCell>
                         <StyledTableCell align="right">Active</StyledTableCell>

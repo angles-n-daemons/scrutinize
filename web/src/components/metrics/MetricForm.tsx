@@ -22,6 +22,14 @@ export default function MetricForm({
   const [metricType, setMetricType] = useState<string>('binomial');
   const [errorText, setErrorText] = useState<string>('');
 
+  function resetState() {
+    setOpen(false);
+    setSavingValue(false);
+    setMetricName('');
+    setMetricType('binomial');
+    setErrorText('');
+  }
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -55,7 +63,7 @@ export default function MetricForm({
         if (userError) {
             setErrorText(userError);
         } else {
-            setOpen(false);
+            resetState();
             updateMetrics();
         }
     } catch (e: any) {

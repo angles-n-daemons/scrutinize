@@ -78,8 +78,8 @@ export default function MetricList() {
             <Table className={classes.table} aria-label="customized table">
                 <TableHead>
                     <TableRow>
-                        <StyledTableCell>Metric</StyledTableCell>
-                        <StyledTableCell align="right">MetricType</StyledTableCell>
+                        <StyledTableCell>Name</StyledTableCell>
+                        <StyledTableCell align="right">Type</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

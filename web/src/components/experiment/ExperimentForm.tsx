@@ -12,7 +12,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import MetricSelect from 'components/experiment/MetricSelect';
 import PercentageSlider from 'components/experiment/PercentageSlider';
 
-import API from 'api/api';
+import API, { Metric } from 'api/api';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -46,8 +46,16 @@ export default function ExperimentForm({
   const [savingValue, setSavingValue] = useState<boolean>(false);
   const [experimentName, setExperimentName] = useState<string>('');
   const [rollout, setRollout] = useState<number>(5);
-  const [metrics, setMetrics] = useState<any>([]);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
   const [errorText, setErrorText] = useState<string>('');
+
+  function resetState() {
+    setOpen(false);
+    setSavingValue(false);
+    setExperimentName('');
+    setRollout(5);
+    setErrorText('');
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -65,25 +73,17 @@ export default function ExperimentForm({
             setErrorText('Must include a name for your experiment');
             return
         }
-        const evaluationCriterion = metrics.map((metric: {
-            value: string;
-            label: string;
-        }) => {
-            return {
-                id: metric.value,
-                name: metric.label,
-            };
-        });
+
         const userError = await API.saveExperiment({
             name: experimentName,
             percentage: rollout,
-            evaluation_criterion: evaluationCriterion,
+            evaluation_criterion: metrics,
         });
 
         if (userError) {
             setErrorText(userError);
         } else {
-            setOpen(false);
+            resetState();
             updateExperiments();
         }
     } catch (e: any) {

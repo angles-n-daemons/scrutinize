@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import Select, { ValueType, ActionMeta } from 'react-select';
+import Chip from '@material-ui/core/Chip';
+import TextField from '@material-ui/core/TextField';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import API from 'api/api'
 
 interface MetricSelectProps {
-    setMetrics: (value: ValueType<{ label: string; value: string; }>, actionMeta: ActionMeta<{ label: string; value: string; }>) => void;
+    setMetrics: any;
+}
+
+interface AutocompleteOption {
+	title: string;
+    id: number;
 }
 
 export default function MetricSelect({
@@ -17,34 +24,37 @@ export default function MetricSelect({
             const apiMetrics = await API.getMetrics();
             setOptions(apiMetrics.map((metric) => {
                 return {
-                    value: metric.id,
-                    label: metric.name,
+                    id: metric.id,
+                    title: metric.name,
                 };
             }));
         }
         getMetrics();
     }, []);
 
-    if (options && options.length) {
-        return (
-          <Select
-            inputId={'metricsSelector'}
-            isMulti
-            cacheOptions
-            defaultOptions={[]}
-            options={options}
-            placeholder="Select metrics..."
-            onChange={setMetrics}
-          />
-        );
-    }
+    function handleChangeMetrics(_: any, values: any) {
+		setMetrics(values.map(({ id, title }: AutocompleteOption) => { return { id, name: title } }));
+	}
+
     return (
-      <Select
-        inputId={'emptyMetricsSelector'}
-        cacheOptions
-        isMulti
-        defaultOptions={[]}
-        placeholder="Select metrics..."
+      <Autocomplete
+        multiple
+        id="fixed-tags-demo"
+        onChange={handleChangeMetrics}
+        options={options}
+        getOptionLabel={(option: any) => option.title}
+        renderTags={(tagValue, getTagProps) =>
+          tagValue.map((option, index) => (
+            <Chip
+              label={option.title}
+              {...getTagProps({ index })}
+            />
+          ))
+        }
+        style={{ width: '100%' }}
+        renderInput={(params) => (
+          <TextField {...params} label="Evaluation Criterion" variant="outlined" placeholder="Select Metrics..." />
+        )}
       />
     );
 }
