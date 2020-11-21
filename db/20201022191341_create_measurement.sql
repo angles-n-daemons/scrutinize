@@ -1,12 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE Measurement(
-	experiment_id   INT NOT NULL REFERENCES Experiment(id),
-	treatment_id    INT NOT NULL REFERENCES Treatment(id),
-	metric_name     VARCHAR(256),
+	metric_name     VARCHAR(256) REFERENCES Metric(name),
 	value           NUMERIC NOT NULL,
 	user_id         VARCHAR(256) NOT NULL,
-	variant         VARCHAR(256) NOT NULL,
 	created_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
