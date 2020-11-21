@@ -12,6 +12,7 @@ export default function errorMiddleware(err: Error, _: Request, res: Response, n
     if (res.headersSent || !res.status){ next(err); }
 
     console.error(err.stack)
+    console.error(err.message)
     var userError = 'Unable to handle request';
     console.log(err);
     if ('userError' in err) {

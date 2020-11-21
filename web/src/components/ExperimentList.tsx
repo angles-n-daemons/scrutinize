@@ -114,7 +114,7 @@ export default function ExperimentList() {
                         <StyledTableRow key={experiment.id}>
                             <StyledTableCell align="right">{experiment.name}</StyledTableCell>
                             <StyledTableCell align="right">{experiment.percentage}%</StyledTableCell>
-                            <StyledTableCell align="right">{experiment.created_time}</StyledTableCell>
+                            <StyledTableCell align="right">{new Date(experiment.started_time).toLocaleString('en-US')}</StyledTableCell>
                             <StyledTableCell align="right">
                               <Switch
                                 checked={experiment.active}

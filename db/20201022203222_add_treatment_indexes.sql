@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE INDEX idx_treatment_user_date ON Treatment(experiment_id, user_id, created_time);
+CREATE INDEX idx_treatment_experiment_run_user ON Treatment(experiment_id, experiment_run);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP INDEX idx_treatment_user_date;
+DROP INDEX idx_treatment_experiment_run_user;
 -- +goose StatementEnd

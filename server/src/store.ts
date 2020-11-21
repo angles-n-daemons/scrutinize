@@ -34,7 +34,7 @@ export class PGStore {
 
     public async healthy(): Promise<boolean> {
 		const rows = (await this.pool.query(
-            `SELECT COUNT(*) FROM Experiment`
+            `SELECT id FROM Experiment LIMIT 1`
         )).rows;
  
         return rows.length === 1;
@@ -43,7 +43,7 @@ export class PGStore {
     public async getExperiments(): Promise<Experiment[]> {
 		return (await this.pool.query(
             `
-            SELECT id, name, percentage, active, created_time, last_active_time
+            SELECT id, name, percentage, active, started_time, ended_time
             FROM Experiment
             ORDER BY id DESC
             `
@@ -87,13 +87,21 @@ export class PGStore {
     }
 
     public async toggleExperimentActive({ id, active }: Experiment): Promise<void> {
-	    await this.pool.query(
-            `UPDATE Experiment SET active=$1 WHERE id=$2`,
-            [active, id],
-        );
+        var query = '', params = [active, id];
+        if (active) {
+            query = `UPDATE Experiment
+                        SET active=$1, run_count=run_count+1, started_time=CURRENT_TIMESTAMP, ended_time=NULL
+                      WHERE id=$2`
+        } else {
+            query = `UPDATE Experiment
+                        SET active=$1, ended_time=CURRENT_TIMESTAMP
+                      WHERE id=$2`
+        }
+	    await this.pool.query(query, params);
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
+        // TODO: Add experiment_run to the insert
         const { user_id, variant, error, duration_ms, experiment_name } = t;
 		await this.pool.query(
             `
@@ -102,9 +110,12 @@ export class PGStore {
                 variant,
                 error,
                 duration_ms,
-                experiment_id
+                experiment_id,
+                experiment_run
             )
-            VALUES ($1, $2, $3, $4, (SELECT id FROM Experiment WHERE name=$5))
+            SELECT $1, $2, $3, $4, id, run_count
+              FROM experiment e
+             WHERE e.name=$5
             `,
             [user_id, variant, error, duration_ms, experiment_name],
         );
@@ -143,37 +154,18 @@ export class PGStore {
     }
 
     public async createMeasurement(measurement: Measurement): Promise<void> {
-        // Find treatments to be applied based on time and experiment criterion
+        // TODO: Complete rewrite
         const { metric_name, value, user_id, created_time } = measurement;
 		await this.pool.query(
             `
-            WITH SelectedTreatments AS (
-                SELECT t.user_id, t.variant, MAX(t.id) as id
-                  FROM TREATMENT t
-                  JOIN Experiment e ON e.id=t.experiment_id
-                  JOIN EvaluationCriterion ec ON ec.experiment_id=e.id
-                  JOIN Metric m ON m.id = ec.metric_id
-                 WHERE m.name=$1
-                 GROUP BY 1, 2
-            )
             INSERT INTO Measurement(
-                experiment_id,
-                treatment_id,
                 metric_name,
                 value,
                 user_id,
-                variant,
                 created_time
-            )
-            SELECT e.id, t.id, $1, $2, $3, t.variant, COALESCE($4, CURRENT_TIMESTAMP)
-              FROM Treatment t
-              JOIN SelectedTreatments st ON st.id=t.id
-              JOIN experiment e ON t.experiment_id = e.id
-             WHERE t.user_id=$5
-              ORDER BY t.user_id, t.created_time DESC
-              LIMIT 1
+            ) VALUES ($1, $2, $3, $4)
             `,
-            [metric_name, value.toString(), user_id, created_time, user_id],
+            [metric_name, value.toString(), user_id, created_time || new Date()],
         );
     }
 
@@ -185,7 +177,7 @@ export class PGStore {
 
     public async getDetails(experiment: string): Promise<Details> {
 		const details: Details = (await this.pool.query(
-            `SELECT id, name, percentage, created_time, last_active_time
+            `SELECT id, name, percentage, started_time, ended_time
               FROM Experiment
              WHERE name=$1`,
             [experiment],
@@ -205,15 +197,34 @@ export class PGStore {
     }
 
     public async getPerformance(experiment: string): Promise<Performance> {
+		const exp = (await this.pool.query(
+            `
+            SELECT id, started_time, ended_time
+            FROM Experiment
+            WHERE name=$1
+            `,
+            [experiment],
+        )).rows as Experiment[];
+        if (exp.length !== 1) {
+            throw UserError(Error('PGStore.getPerformance: incorrect number of experiments'), 'Unable to complete your request');
+        }
+
 		const rows = (await this.pool.query(
             `
-            SELECT metric_name, DATE(created_time), variant, COUNT(*), AVG(value), STDDEV(value)
-              FROM Measurement
-             WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
+            WITH TreatmentLookup AS (
+                SELECT t.user_id, t.variant
+                  FROM Treatment t
+                  JOIN Experiment e ON e.id=t.experiment_id AND t.experiment_run=e.run_count
+                 WHERE e.id=$1
+            )
+            SELECT m.metric_name, DATE(m.created_time), tl.variant, COUNT(*), AVG(value), STDDEV(value)
+              FROM Measurement m
+              JOIN TreatmentLookup tl ON tl.user_id=m.user_id
+             WHERE m.created_time BETWEEN COALESCE($2, CURRENT_TIMESTAMP) AND COALESCE($3, CURRENT_TIMESTAMP)
              GROUP BY 1, 2, 3
              ORDER BY 1, 2 ASC, 3 ASC
             `,
-            [experiment],
+            [exp[0].id, exp[0].started_time, exp[0].ended_time],
         )).rows as DataPoint[];
 
         const performance: Performance = {};

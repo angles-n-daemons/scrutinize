@@ -3,9 +3,11 @@ export interface Experiment {
     name: string;
     percentage: number;
     active: boolean;
+    run_count: number;
     evaluation_criterion?: Metric[];
     created_time?: Date;
-    last_active_time?: Date;
+    started_time?: Date;
+    ended_time?: Date;
 }
 
 export interface Treatment {
@@ -14,14 +16,13 @@ export interface Treatment {
     error: string;
     duration_ms: number;
     experiment_name: string;
+    experiment_run?: number;
 }
 
 export interface Measurement {
     user_id: string;
     metric_name: string;
     value: number;
-    treatment_id: number;
-    variant: 'control' | 'experiment';
     created_time?: string;
 }
 

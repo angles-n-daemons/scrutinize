@@ -1,5 +1,6 @@
 import aiohttp
 import asyncio
+import datetime
 import hashlib
 import time
 
@@ -53,7 +54,7 @@ class ScrutinizeClient:
         is_experiment = False
 
         if experiment_config is None:
-            print('Experiment.call: experiment not found, only control will be run')
+            print('ScrutinizeClient._get_variant: experiment not found, only control will be run')
         elif experiment_config.get('active', False):
             # convert id to a number between 0 and 99
             id_int = int(hashlib.md5(variant_operand).hexdigest(), 16) % 100
@@ -110,6 +111,8 @@ class ScrutinizeClient:
         value: float,
         created_time: str=None,
     ):
+        if not created_time:
+            created_time = datetime.datetime.now().isoformat()
         await self.post('/measurement', {
             'user_id': user_id,
             'metric_name': metric,
