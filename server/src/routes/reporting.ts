@@ -1,15 +1,16 @@
 import { Request, Response, Router as ExpressRouter } from 'express';
 
-import Controller from 'controller/controller';
+import ReportingController from 'controller/reporting';
 import toAsyncRouter from '../middleware/asyncRouter'
 
 export default class ReportingRouter {
 	constructor(
-		private controller: Controller,
+		private controller: ReportingController,
 	) {}
 
 	public routes(): ExpressRouter {
 		const router = toAsyncRouter(ExpressRouter());
+        console.log('giving routes');
 		router.get('/details/:experiment', this.getDetails.bind(this));
 		router.get('/performance/:experiment', this.getPerformance.bind(this));
 		return router;

@@ -1,14 +1,12 @@
-import { Store } from 'database/store';
+import MetricStore from 'database/metric';
 import {
     Metric,
     Measurement,
-    Details,
-    Performance,
 } from 'database/model';
 
 export default class MetricController {
     constructor (
-        private store: Store,
+        private store: MetricStore,
     ) {}
 
     public async createMeasurement(measurement: Measurement): Promise<void> {

@@ -1,11 +1,11 @@
 import { Request, Response, Router as ExpressRouter } from 'express';
 
-import Controller from 'controller/controller';
+import MetricController from 'controller/metric';
 import toAsyncRouter from '../middleware/asyncRouter'
 
 export default class MetricRouter {
 	constructor(
-		private controller: Controller,
+		private controller: MetricController,
 	) {}
 
 	public routes(): ExpressRouter {

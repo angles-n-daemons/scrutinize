@@ -1,4 +1,4 @@
-import { Store } from 'database/store';
+import ReportingStore from 'database/reporting';
 import {
     Details,
     Performance,
@@ -6,7 +6,7 @@ import {
 
 export default class ReportingController {
     constructor (
-        private store: Store,
+        private store: ReportingStore,
     ) {}
 
     public async getDetails(experiment: string): Promise<Details> {
