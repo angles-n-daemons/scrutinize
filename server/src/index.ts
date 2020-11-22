@@ -3,8 +3,11 @@ import { Pool } from 'pg';
 
 import Config from './config';
 import Controller from './controller/controller';
+import ExperimentController from './controller/experiment';
 import Router from './routes/router';
+import ExperimentRouter from './routes/experiment';
 import { PGStore } from './database/store';
+import { ExperimentStore } from './database/experiment';
 import logMiddleware from './middleware/logger';
 import errorMiddleware from './middleware/errors';
 
@@ -15,6 +18,11 @@ async function main() {
     const config = Config.readFromEnvironment(process.env);
     const pool = new Pool(config.dbOptions());
     const store = new PGStore(pool);
+    const experimentRouter = new ExperimentRouter(
+        new ExperimentController(
+            new ExperimentStore(pool),
+        ),
+    );
     const controller = new Controller(store);
     const router = new Router(controller);
 
@@ -23,6 +31,7 @@ async function main() {
     app.use(express.json());
     app.use(logMiddleware);
     app.use(BASE_PATH, router.routes());
+    app.use(BASE_PATH, experimentRouter.routes());
     app.use(errorMiddleware);
 
     // Begin serving requests

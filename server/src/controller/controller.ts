@@ -1,37 +1,15 @@
 import { Store } from 'database/store';
 import {
-    Experiment,
     Metric,
     Measurement,
     Details,
     Performance,
-    Treatment,
 } from 'database/model';
 
 export default class Controller {
     constructor (
         private store: Store,
     ) {}
-
-    public async healthy(): Promise<boolean> {
-        return await this.store.healthy();
-    }
-
-    public async getExperiments(): Promise<Experiment[]> {
-        return await this.store.getExperiments();
-    }
-
-    public async createExperiment(experiment: Experiment): Promise<void> {
-        await this.store.createExperiment(experiment);
-    }
-
-    public async toggleExperimentActive(experiment: Experiment): Promise<void> {
-        await this.store.toggleExperimentActive(experiment);
-    }
-
-    public async createTreatment(treatment: Treatment): Promise<void> {
-        await this.store.createTreatment(treatment);
-    }
 
     public async createMeasurement(measurement: Measurement): Promise<void> {
         const { metric_name } = measurement;
