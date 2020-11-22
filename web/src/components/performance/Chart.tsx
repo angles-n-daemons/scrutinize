@@ -31,11 +31,11 @@ export default function PerformanceChart ({
     }
     for (const dataPoint of performanceData.control) {
         const cP = dataPoint;
-        if (!(cP.date in experimentDataMap)) {
-            continue;
+        var eP: DataPoint = {} as DataPoint;
+        if (cP.date in experimentDataMap) {
+            eP = experimentDataMap[cP.date];
         }
 
-        const eP = experimentDataMap[cP.date];
         const controlConfidence = (Z * (cP.stddev / Math.sqrt(cP.count)));
         const experimentConfidence = (Z * (eP.stddev / Math.sqrt(eP.count)));
         data.push([
