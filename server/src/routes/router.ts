@@ -1,6 +1,6 @@
 import { Request, Response, Router as ExpressRouter } from 'express';
 
-import Controller from './controller';
+import Controller from 'controller/controller';
 
 // Async routing copied from: https://stackoverflow.com/a/57099213
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

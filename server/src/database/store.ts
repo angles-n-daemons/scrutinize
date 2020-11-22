@@ -9,9 +9,9 @@ import {
     Performance,
     Treatment,
     DataPoint,
-} from './model';
+} from 'database/model';
 
-import { UserError } from './middleware/errors';
+import { UserError } from '../middleware/errors';
 
 export interface Store {
     healthy: () => Promise<boolean>;

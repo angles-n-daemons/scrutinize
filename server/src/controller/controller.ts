@@ -1,4 +1,4 @@
-import { Store } from './store';
+import { Store } from 'database/store';
 import {
     Experiment,
     Metric,
@@ -6,7 +6,7 @@ import {
     Details,
     Performance,
     Treatment,
-} from './model';
+} from 'database/model';
 
 export default class Controller {
     constructor (

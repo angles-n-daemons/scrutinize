@@ -2,7 +2,7 @@
   "compilerOptions": {
 	"allowUnreachableCode": false,
 	"alwaysStrict": true,
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",

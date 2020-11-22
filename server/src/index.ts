@@ -2,9 +2,9 @@ import express from 'express';
 import { Pool } from 'pg';
 
 import Config from './config';
-import Controller from './controller';
-import Router from './router';
-import { PGStore } from './store';
+import Controller from './controller/controller';
+import Router from './routes/router';
+import { PGStore } from './database/store';
 import logMiddleware from './middleware/logger';
 import errorMiddleware from './middleware/errors';
 
