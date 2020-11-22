@@ -7,18 +7,10 @@ import {
 
 import { UserError } from '../middleware/errors';
 
-export class ExperimentStore {
+export default class ExperimentStore {
     constructor (
         private pool: Pool,
     ) {}
-
-    public async healthy(): Promise<boolean> {
-		const rows = (await this.pool.query(
-            `SELECT id FROM Experiment LIMIT 1`
-        )).rows;
- 
-        return rows.length === 1;
-    }
 
     public async getExperiments(): Promise<Experiment[]> {
 		return (await this.pool.query(

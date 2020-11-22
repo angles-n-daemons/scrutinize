@@ -1,4 +1,4 @@
-import { ExperimentStore } from 'database/experiment';
+import ExperimentStore from 'database/experiment';
 import {
     Experiment,
     Treatment,
@@ -8,10 +8,6 @@ export default class ExperimentController {
     constructor (
         private store: ExperimentStore,
     ) {}
-
-    public async healthy(): Promise<boolean> {
-        return await this.store.healthy();
-    }
 
     public async getExperiments(): Promise<Experiment[]> {
         return await this.store.getExperiments();

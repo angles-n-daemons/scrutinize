@@ -6,7 +6,7 @@ import {
     Performance,
 } from 'database/model';
 
-export default class Controller {
+export default class MetricController {
     constructor (
         private store: Store,
     ) {}
@@ -25,14 +25,5 @@ export default class Controller {
 
     public async createMetric(metric: Metric): Promise<void> {
         await this.store.createMetric(metric);
-    }
-
-
-    public async getDetails(experiment: string): Promise<Details> {
-        return await this.store.getDetails(experiment);
-    }
-
-    public async getPerformance(experiment: string): Promise<Performance> {
-        return await this.store.getPerformance(experiment);
     }
 }

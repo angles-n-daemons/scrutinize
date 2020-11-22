@@ -10,30 +10,11 @@ export default class ExperimentRouter {
 
 	public routes(): ExpressRouter {
 		const router = toAsyncRouter(ExpressRouter());
-		router.get('/alive', this.alive.bind(this));
-		router.get('/health', this.health.bind(this));
 		router.get('/experiment', this.getExperiment.bind(this));
 		router.post('/experiment', this.postExperiment.bind(this));
 		router.post('/experiment/active', this.postExperimentActive.bind(this));
 		router.post('/treatment', this.postTreatment.bind(this));
 		return router;
-	}
-
-	private async alive(_: Request, res: Response) {
-		res.json({status: 'ok'});
-	}
-
-	private async health(_: Request, res: Response) {
-		try {
-			const healthy = await this.controller.healthy();
-			if (!healthy) {
-				res.status(500).json({status: 'not ok'});
-			}
-			res.json({status: 'ok'});
-		} catch (e) {
-			console.log(e);
-			res.status(500).json({status: 'not ok'});
-		}
 	}
 
 	private async getExperiment(_: Request, res: Response) {
