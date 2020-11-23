@@ -19,7 +19,7 @@ The quickstart guide is structured so that you can quickly and easily understand
 | docker-compose| 1.0+          |
 | python        | 3.6+          |
 
-### Running the server
+### Running the service
 
 After cloning the repository locally, you can start the server and database using docker compose:
 
