@@ -9,11 +9,11 @@ The quickstart guide is structured so that you can quickly and easily understand
 1. Running the service
 2. Installing the client
 3. Adding a metric to your project
-  a. Creating the metric using the dashboard
-  b. Using the client to record values
+  - Creating the metric using the dashboard
+  - Using the client to record values
 4. Setting up your first experiment
-  a. Creating the experiment using the dashboard
-  b. Using the client to partition user behavior
+  - Creating the experiment using the dashboard
+  - Using the client to partition user behavior
 5. Reviewing the results of your experiment
 
 ### Requirements
