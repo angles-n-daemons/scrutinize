@@ -42,6 +42,8 @@ pip install scrutinize-client
 
 Before you can use the client, you need to add some metrics and experiments. Experiments depend on metrics, so please create some metrics first by navigating to the [Metrics Dashboard](http://localhost:5001/metrics). Some example metrics might include "converted", "purchase_price", "load_time_ms" and "user_click".
 
+
+
 Once you've completed that, you can start recording metrics from within your application using the client. See the below code snippet for an example:
 
 ```python
