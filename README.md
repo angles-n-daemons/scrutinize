@@ -1,6 +1,6 @@
 # scrutinize
 
-scrutinize was born for ease of usability within the world of experimentation. Inspired by the design of [Unleash](https://github.com/Unleash/unleash), it aims to encapsulate everything needed to conduct an online experiment in a minimal client / server implementation.
+scrutinize was born for ease of usability within the world of experimentation. Inspired by the design of [Unleash](https://github.com/Unleash/unleash), it aims to encapsulate everything needed for an online experiment in a minimal client / server implementation.
 
 ## Quickstart
 
