@@ -90,7 +90,8 @@ class AdsController:
         )
 ```
 
-### Using the reporting features
+### Reviewing the results of your experiment
+
 
 While your experiment is running, you can use the Performance feature in the [Experiments Dashboard](http://localhost:5001) to get RED metrics on your experiment, as well as the selected Evaluation Metrics you had defined.
 
