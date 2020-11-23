@@ -42,6 +42,8 @@ pip install scrutinize-client
 
 Before you can use the client, you need to add some metrics and experiments. Experiments depend on metrics, so please create some metrics first by navigating to the [Metrics Dashboard](http://localhost:5001/metrics). Some example metrics might include "converted", "purchase_price", "load_time_ms" and "user_click".
 
+![adding a metric](docs/readme/add_metrics.png)
+
 Once you've completed that, you can start recording metrics from within your application using the client. See the below code snippet for an example:
 
 ```python
@@ -67,6 +69,8 @@ class CheckoutController:
 
 Navigate to the [Experiments Dashboard](http://localhost:5001) and create an experiment with some of the metrics just added.
 
+![adding an experiment](docs/readme/add_experiment.png)
+
 Once the experiment has been added, you should be able to conduct the experiment in your service using the client API. Use the below code snippet as a reference:
 
 ```python
@@ -89,3 +93,5 @@ class AdsController:
 ### Using the reporting features
 
 While your experiment is running, you can use the Performance feature in the [Experiments Dashboard](http://localhost:5001) to get RED metrics on your experiment, as well as the selected Evaluation Metrics you had defined.
+
+![checking the experiment results](docs/readme/reporting.png)
