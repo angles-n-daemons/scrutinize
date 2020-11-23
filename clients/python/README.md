@@ -6,7 +6,7 @@ This is the client for the [scrutinize experimentation platform](https://github.
 
 To install the project, use pip:
 
-`pip install scrutinize-client`
+`pip install scrutinize`
 
 ## Usage
 

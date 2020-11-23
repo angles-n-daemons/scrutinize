@@ -35,7 +35,7 @@ scrutinize should then be running on port 5001, verify this by navigating to the
 Now that the server is populated you are ready to begin using the client. Install a client of your choice (currently only python) into the project you want to experiment with.
 
 ```bash
-pip install scrutinize-client
+pip install scrutinize
 ```
 
 ### Adding a metric to your project
