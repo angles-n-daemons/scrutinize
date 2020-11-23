@@ -33,7 +33,7 @@ from my_library import can_user_have_free_coffee
 
 scrutinize = ScrutinizeClient('https://scrutinize-location')
 give_free_coffee = await scrutinize.call(
-    experiment='eng.give_user_free_coffee',
+    experiment_name='eng.give_user_free_coffee',
     user_id='wilma_rudolph',
     control=False,
     experiment=lambda: can_user_have_free_coffee('wilma_rudolph'),

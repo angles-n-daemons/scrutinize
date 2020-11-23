@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='scrutinize',
-    version='0.0.2',
+    version='0.0.3',
     description='the lightweight experimentation platform',
     long_description=long_description,
     long_description_content_type="text/markdown",
