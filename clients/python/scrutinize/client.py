@@ -21,7 +21,7 @@ class ScrutinizeClient:
 
     async def call(
         self,
-        experiment_name: str,
+        experiment: str,
         user_id: str,
         control: Callable,
         experiment: Callable,
