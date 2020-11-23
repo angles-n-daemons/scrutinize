@@ -35,7 +35,7 @@ class ScrutinizeClient:
         2. Attempts to resolve the control or variant - can be functional
            or a literal value.
         3. After resolution is complete or has failed, records the treatment
-           event to the scrutinize server.
+           event to the server.
 
         :param experiment_name: name of experiment associated with the call
         :param user_id: identifying of the user who originated this request

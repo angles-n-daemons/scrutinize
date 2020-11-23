@@ -17,7 +17,6 @@ export default class Config {
     ) {}
 
     public dbOptions(): Configuration {
-        
         return {
             host: this.db_host,
             port: this.db_port,
