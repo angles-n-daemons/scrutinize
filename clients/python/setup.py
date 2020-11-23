@@ -7,6 +7,8 @@ setup(
     name='scrutinize',
     version='0.1.1',
     description='the lightweight experimentation platform',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url='http://github.com/angles-n-daemons/scrutinize',
     author='brian dillmann',
     author_email='dillmann.brian@gmail.com',
