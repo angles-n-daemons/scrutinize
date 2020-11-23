@@ -4,6 +4,18 @@ scrutinize was born for ease of usability within the world of experimentation. I
 
 ## Quickstart
 
+The quickstart guide is structured so that you can quickly and easily understand the scrutinize feature set in an easy enough way. This guide will walk you through the following:
+
+1. Running the service
+2. Installing the client
+3. Adding a metric to your project
+  a. Creating the metric using the dashboard
+  b. Using the client to record values
+4. Setting up your first experiment
+  a. Creating the experiment using the dashboard
+  b. Using the client to partition user behavior
+5. Reviewing the results of your experiment
+
 ### Requirements
 
 | Requirement   | Version       |
@@ -22,12 +34,6 @@ docker-compose up
 
 scrutinize should then be running on port 5001, verify this by navigating to the [Experiments Dashboard](http://localhost:5001).
 
-### Creating metrics & experiments
-
-Before you can use the client, you need to add some metrics and experiments. Experiments depend on metrics, so please create some metrics first by navigating to the [Metrics Dashboard](http://localhost:5001/metrics). Some example metrics might include "converted", "purchase_price", "load_time_ms" and "user_click".
-
-Once you've completed that, navigate back to the [Experiments Dashboard](http://localhost:5001) and create an experiment with some of the metrics you just added.
-
 ### Installing the client
 
 Now that the server is populated you are ready to begin using the client. Install a client of your choice (currently only python) into the project you want to experiment with.
@@ -36,14 +42,11 @@ Now that the server is populated you are ready to begin using the client. Instal
 pip install scrutinize-client
 ```
 
-### Using the client
+### Adding a metric to your project
 
-You can now do the following things with the client:
+Before you can use the client, you need to add some metrics and experiments. Experiments depend on metrics, so please create some metrics first by navigating to the [Metrics Dashboard](http://localhost:5001/metrics). Some example metrics might include "converted", "purchase_price", "load_time_ms" and "user_click".
 
-1. Record metric observations (used for reporting).
-2. Conduct experiments inline using the client API.
-
-Using the client, add some metric readings to your project codebase. An example is below:
+Once you've completed that, you can start recording metrics from within your application using the client. See the below code snippet for an example:
 
 ```python
 from scrutinize import ScrutinizeClient
@@ -64,7 +67,11 @@ class CheckoutController:
         )
 ```
 
-You can then also conduct the experiment using the client API, see the below example code for usage.
+### Setting up your first experiment
+
+Navigate to the [Experiments Dashboard](http://localhost:5001) and create an experiment with some of the metrics just added.
+
+Once the experiment has been added, you should be able to conduct the experiment in your service using the client API. Use the below code snippet as a reference:
 
 ```python
 from scrutinize import ScrutinizeClient
