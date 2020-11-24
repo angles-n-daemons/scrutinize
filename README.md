@@ -2,8 +2,6 @@
 
 scrutinize is a lightweight experimentation framework focused on conducting and analysing online experiments (a/b tests).
 
-__Build Status__
-
 ![Experiment List](docs/readme/experiment_list.png)
 ![Adding an Experiment](docs/readme/add_experiment.png)
 ![Analysing Experiment Performance](docs/readme/reporting.png)
