@@ -8,7 +8,7 @@ scrutinize is a lightweight experimentation framework focused on conducting and 
 
 Currently the ecosystem for A/B testing tools consists of either costly SaaS providers, or incomplete open source solutions. For smaller companies that cannot afford an enterprise offering, the options are limited to discontinued projects, fragmented deployments or building a platform in house.
 
-scrutinize aims to be an all in one package for designing, conducting, monitoring and analyzing controlled online experiments at reasonable scale. It is a server + suite of clients that works well with the currently popular microservice ecosystem.
+scrutinize aims to be an all in one package for designing, conducting, monitoring and analysing controlled online experiments at reasonable scale. It is a server + suite of clients that works well with the currently popular microservice ecosystem.
 
 # Getting Started
 
