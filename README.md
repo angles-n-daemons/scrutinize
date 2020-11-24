@@ -1,98 +1,50 @@
 # scrutinize
 
-scrutinize was born for ease of usability within the world of experimentation. Inspired by the design of [Unleash](https://github.com/Unleash/unleash), it aims to encapsulate everything needed for an online experiment in a minimal client / server implementation.
+Inspired by the design of [Unleash](https://github.com/Unleash/unleash), scrutinize is a lightweight experimentation framework focused on conducting and analysing online experiments (a/b tests).
 
-## Quickstart
+__Build Status__
 
-The quickstart guide is structured so that you can quickly and easily understand the scrutinize feature set in an easy enough way. This guide will walk you through the following:
+![Experiment List](docs/readme/experiment_list.png)
+![Adding an Experiment](docs/readme/add_experiment.png)
+![Analysing Experiment Performance](docs/readme/reporting.png)
 
-1. Running the service
-2. Installing the client
-3. Adding metrics to your project
-4. Setting up your first experiment
-5. Reviewing the results of your experiment
+# Motiviation
 
-### Requirements
+Currently the ecosystem for A/B testing tools consists of either costly SaaS providers, or incomplete open source solutions. For smaller companies that cannot afford an enterprise offering, the options are limited to discontinued projects, fragmented deployments or building a platform in house.
 
-| Requirement   | Version       |
-| ------------- | ------------- |
-| docker-compose| 1.0+          |
-| python        | 3.6+          |
+scrutinize aims to be an all in one package for designing, conducting, monitoring and analyzing controlled online experiments at reasonable scale. It is a server + suite of clients that works well with the currently popular microservice ecosystem.
 
-### Running the service
+# Getting Started
 
-After cloning the repository locally, you can start the server and database using docker compose:
+To begin working with scrutinize - consult the [Quickstart Guide](docs/quickstart/QUICKSTART.md) for instructions on setting up a scrutinize service deployment and using a client to conduct an experiment.
 
-```bash
-cd <path>/<to>/<scrutinize>
-docker-compose up
-```
+# Contributing
 
-scrutinize should then be running on port 5001, verify this by navigating to the [Experiments Dashboard](http://localhost:5001).
+Feel free to open an issue, PR or simply have a discussion about modifications to this project. In the weeks to come we'll try to flesh out a more comprehensive set of contribution guidelines.
 
-### Installing the client
+# Inspiration
 
-Now that the server is populated you are ready to begin using the client. Install a client of your choice (currently only python) into the project you want to experiment with.
+Scrutinize was inspired by and draws elements from the following projects:
 
-```bash
-pip install scrutinize
-```
+ - [Unleash](https://github.com/Unleash/unleash) _system & client design_
+ - [Uber XP](https://eng.uber.com/xp/) _analysis system_
+ - [Wasabi](https://github.com/intuit/wasabi) _api design_
 
-### Adding a metric to your project
+The following book informed a lot of the design choices in this project:
 
-Before you can use the client, you need to add some metrics and experiments. Experiments depend on metrics, so please create some metrics first by navigating to the [Metrics Dashboard](http://localhost:5001/metrics). Some example metrics might include "converted", "purchase_price", "load_time_ms" and "user_click".
+[Trustworth Online Controlled Experiments: A Practical Guide to A/B Testing](https://books.google.com/books/about/Trustworthy_Online_Controlled_Experiment.html?id=bJY1yAEACAAJ)
 
-![adding a metric](docs/readme/add_metrics.png)
+# Roadmap
 
-Once you've completed that, you can start recording metrics from within your application using the client. See the below code snippet for an example:
+Some next high level goals for this project are as follows:
 
-```python
-from scrutinize import ScrutinizeClient
+ - Calculating p-values on the evaluation metrics to better inform experiment success
+ - Bulk upload of observation metrics via api
+ - Client consistency with respect to experiment toggles (active killswitch)
+ - Automated power estimation and recommendation via 1-7 day A/A dry run
+ - Caching performance results to ensure scalibility in analysis
+ - Population selection for experiment iterations
 
-class CheckoutController:
-    def __init__(self, scrutinize: ScrutinizeClient, ...):
-        self.scrutinize = scrutinize
-    ...
+# Credits
 
-    def complete_purchase(self, user_id):
-        basket = self.get_basket(user_id)
-
-        # recording a metric value for reporting
-        self.scrutinize.observe(
-            user_id,
-            'checkout_amount',
-            basket.price_total,
-        )
-```
-
-### Setting up your first experiment
-
-Navigate to the [Experiments Dashboard](http://localhost:5001) and create an experiment with some of the metrics just added.
-
-![adding an experiment](docs/readme/add_experiment.png)
-
-Once the experiment has been added, you should be able to conduct the experiment in your service using the client API. Use the below code snippet as a reference:
-
-```python
-from scrutinize import ScrutinizeClient
-
-class AdsController:
-    def __init__(self, scrutinize: ScrutinizeClient, ...):
-        self.scrutinize = scrutinize
-    ...
-
-    def show_ads(self, user_id):
-        return self.scrutinize.call(
-            'ml_eng.new_ads_model',
-            user_id,
-            lambda: self.ads_model.predict(user_id), # control behavior
-            lambda: self.new_ads_model.predict(user_id), # experiment behavior
-        )
-```
-
-### Reviewing the results of your experiment
-
-
-While your experiment is running, you can use the Performance feature in the [Experiments Dashboard](http://localhost:5001) to get RED metrics on your experiment, as well as the selected Evaluation Metrics you had defined.
-
-![checking the experiment results](docs/readme/reporting.png)
+Special thanks go out to Lisa Jiang and Punya Biswal for their feedback on both system and api design on this project.
