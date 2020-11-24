@@ -16,7 +16,7 @@ scrutinize aims to be an all in one package for designing, conducting, monitorin
 
 # Getting Started
 
-To begin working with scrutinize - consult the [Quickstart Guide](docs/quickstart/QUICKSTART.md) for instructions on setting up a scrutinize service deployment and using a client to conduct an experiment.
+To begin working with scrutinize - consult the [Quickstart Guide](docs/quickstart/QUICKSTART.md) for instructions on deploying the scrutinize service and conducting an experiment via the client.
 
 # Contributing
 
