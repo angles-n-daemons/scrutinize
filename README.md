@@ -1,6 +1,6 @@
 # scrutinize
 
-Inspired by the design of [Unleash](https://github.com/Unleash/unleash), scrutinize is a lightweight experimentation framework focused on conducting and analysing online experiments (a/b tests).
+scrutinize is a lightweight experimentation framework focused on conducting and analysing online experiments (a/b tests).
 
 __Build Status__
 
