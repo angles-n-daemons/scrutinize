@@ -1,10 +1,10 @@
-# scrutinize-client
+# scrutinize
 
-This is the client for the [scrutinize experimentation platform](https://github.com/angles-n-daemons/scrutinize).
+This is the python client for the [scrutinize experimentation platform](https://github.com/angles-n-daemons/scrutinize).
 
 # Installation
 
-To install the project, use pip:
+To install the client, use pip:
 
 `pip install scrutinize`
 

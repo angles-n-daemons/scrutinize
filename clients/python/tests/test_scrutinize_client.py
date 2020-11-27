@@ -13,6 +13,7 @@ class TestExperiment(unittest.TestCase):
         scrutinize.get_experiments = AsyncMock(return_value={
             'testexp': {'percentage': 50, 'active': True},
         })
+        scrutinize.create_treatment = AsyncMock()
 
         control = MagicMock(return_value=5)
         variant = MagicMock(return_value=10)

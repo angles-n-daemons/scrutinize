@@ -5,7 +5,7 @@ import hashlib
 import time
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 
 class ScrutinizeClient:
@@ -154,7 +154,7 @@ class ScrutinizeClient:
         self,
         user_id: str,
         metric: str,
-        value: float,
+        value: Union[int, float, bool],
         created_time: str=None,
     ):
         """
@@ -165,6 +165,8 @@ class ScrutinizeClient:
         :param value: numeric representation of the value measured
         :param created_time: optional timestamp for the measurement
         """
+        if type(value) == bool:
+            value = int(value)
         if not created_time:
             created_time = datetime.datetime.now().isoformat()
         await self.post('/measurement', {

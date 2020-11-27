@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "alwaysStrict": true,
-    "baseUrl": "./src",
+    "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
@@ -13,6 +13,5 @@
     "rootDir": "./",
     "target": "es6",
     "strict": true
-  },
-  "include": ["src"]
+  }
 }
