@@ -1,6 +1,6 @@
 {
   "name": "scrutinize-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "client for scrutinize lightweight experimentation platform",
   "main": "build/scrutinize.js",
   "types": "build/scrutinize.d.ts",
