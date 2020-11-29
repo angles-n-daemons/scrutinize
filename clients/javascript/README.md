@@ -6,7 +6,7 @@ This is the javascript client for the [scrutinize experimentation platform](http
 
 To install the client, use npm:
 
-`npm i scrutinize`
+`npm i scrutinize-client`
 
 ## Usage
 
