@@ -32,9 +32,7 @@ export interface Metric {
     type?: 'binomial' | 'continuous' | 'count';
 }
 
-export type Performance = Record<string, MetricData>;
-
-export interface MetricData {
+export interface Performance {
     control: DataPoint[];
     experiment: DataPoint[];
 }
@@ -61,4 +59,5 @@ export interface Details {
     created_time?: Date;
     last_active_time?: Date;
     variants: VariantDetails[];
+    evaluation_criterion: Metric[];
 }

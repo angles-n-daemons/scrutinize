@@ -13,7 +13,7 @@ export default class ReportingController {
         return await this.store.getDetails(experiment);
     }
 
-    public async getPerformance(experiment: string): Promise<Performance> {
-        return await this.store.getPerformance(experiment);
+    public async getPerformance(experiment: string, metric: string): Promise<Performance> {
+        return await this.store.getPerformance(experiment, metric);
     }
 }

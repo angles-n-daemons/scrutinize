@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -11,7 +11,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 
-import API, { ExperimentDetails} from 'api/api'
+import { ExperimentDetails } from 'api/api'
 
 const useStyles = makeStyles({
   root: {
@@ -46,31 +46,15 @@ const useStyles = makeStyles({
 });
 
 interface PerformanceInfoBarProps {
-    experiment: string;
-}
-
-const blankDetails = {
-    name: ' ',
-    percentage: 0,
-    active: false,
-    created_time: '1970-01-01',
-    last_active_time: '1970-01-01',
-    variants: [],
+    details: ExperimentDetails,
 }
 
 export default function PerformanceInfoBar({
-	experiment,
+	details,
 }: PerformanceInfoBarProps) {
   const classes = useStyles();
-  const [experimentDetails, setExperimentDetails] = useState<ExperimentDetails>(blankDetails);
 
-  useEffect(() => {
-      async function getDetails() {
-          setExperimentDetails(await API.getDetails(experiment));
-      }
-      getDetails();
-  }, [experiment]);
-  const { name, percentage, active } = experimentDetails;
+  const { name, percentage, active } = details;
   return (
     <div className={classes.root}>
       <Card className={classes.detailsCard} variant="outlined">
@@ -101,7 +85,7 @@ export default function PerformanceInfoBar({
             </TableRow>
           </TableHead>
           <TableBody>
-          {experimentDetails.variants.map((variant) => {
+          {details.variants.map((variant) => {
             return (<TableRow key={variant.variant}>
               <TableCell component="th" scope="row">
                 {variant.variant}

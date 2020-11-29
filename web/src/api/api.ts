@@ -41,6 +41,7 @@ export interface ExperimentDetails {
     created_time: string;
     last_active_time: string;
     variants: VariantDetails[];
+    evaluation_criterion: Metric[];
 }
 
 class API {
@@ -104,8 +105,8 @@ class API {
         return await(await fetch(`${BASE_PATH}/details/${experiment}`)).json() as ExperimentDetails;
     }
 
-    async getPerformance(experiment: string): Promise<Record<string, PerformanceData>> {
-        return await(await fetch(`${BASE_PATH}/performance/${experiment}`)).json() as Record<string, PerformanceData>;
+    async getPerformance(experiment: string, metric: string): Promise<PerformanceData> {
+        return await(await fetch(`${BASE_PATH}/performance/${experiment}/${metric}`)).json() as PerformanceData;
     }
 }
 

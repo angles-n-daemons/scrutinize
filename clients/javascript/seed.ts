@@ -13,12 +13,14 @@ function mockVariant(isExperiment: boolean, sleepMS: number, errPct: number) {
 async function runSeed(scrutinize: ScrutinizeClient) {
     const bumpDate = new Date();
     bumpDate.setDate(bumpDate.getDate()-6);
+    console.log('running');
 
     for (var i = 20; i > 0; i--) {
         const currentDate = new Date();
         currentDate.setDate(currentDate.getDate()-i);
         const dateStr = currentDate.toISOString().split('T')[0];
         const numInteractions = 100 + Math.floor(Math.random() * 1000);
+        console.log('publishing data for ', dateStr);
 
         for (var j = 0; j < numInteractions; j++) {
             var csat = [2, 3][Math.floor(Math.random() * 2)];
