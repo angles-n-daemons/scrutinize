@@ -1,6 +1,11 @@
 # scrutinize
 
-scrutinize is a lightweight experimentation framework focused on conducting and analysing online experiments (a/b tests).
+scrutinize is a lightweight experimentation framework focused on conducting and analysing online experiments (a/b tests). Some of its goals are as follows:
+
+ - Simple local or remote deployment.
+ - Pre-packaged clients for easy usage in multiple languages.
+ - Straightforward experimentation practices.
+ - Built-in metrics tracking and analysis.
 
 ![Analysing Experiment Performance](docs/readme/reporting.png)
 
@@ -12,7 +17,7 @@ scrutinize aims to be an all in one package for designing, conducting, monitorin
 
 # Getting Started
 
-Consult the [Quickstart Guide](docs/quickstart/QUICKSTART.md) for instructions on deploying the scrutinize service and conducting an experiment via the client.
+Consult the [Quickstart Guide](docs/quickstart/QUICKSTART.md) for instructions on deploying the scrutinize service and conducting an experiment via a client.
 
 # Contributing
 
