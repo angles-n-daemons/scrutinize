@@ -12,14 +12,24 @@ CREATE TABLE Run(
 	experiment_id    INT NOT NULL REFERENCES Experiment(id)
 );
 
-CREATE INDEX run_experient_started ON Run(experiment_id, started_time);
+CREATE INDEX run_experiment_started ON Run(experiment_id, started_time);
+
+ALTER TABLE Treatment
+ ADD  COLUMN run_id INT,
+ ADD  CONSTRAINT fk_treatment_run_id
+      FOREIGN KEY (run_id) REFERENCES Run(id);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-ALTER TABLE  Experiment
+ALTER TABLE Experiment
  ADD COLUMN started_time TIMESTAMP,
  ADD COLUMN ended_time   TIMESTAMP;
 
 DROP TABLE Run;
+
+DROP INDEX run_experiment_started;
+
+ALTER TABLE Treatment
+ DROP COLUMN run_id;
 -- +goose StatementEnd

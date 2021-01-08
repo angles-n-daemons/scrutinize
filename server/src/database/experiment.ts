@@ -13,15 +13,18 @@ export default class ExperimentStore {
     ) {}
 
     public async getExperiments(): Promise<Experiment[]> {
-		//return (await this.pool.query(
-		(await this.pool.query(
+		return (await this.pool.query(
             `
-            SELECT id, name, percentage, active, started_time, ended_time
-            FROM Experiment
-            ORDER BY id DESC
+            SELECT e.id, e.name, e.percentage, e.active, run.started_time, run.ended_time
+              FROM Experiment e
+              LEFT JOIN (
+                   SELECT experiment_id, MAX(started_time) as started_time, MAX(ended_time) as ended_time
+                     FROM Run
+                    GROUP BY experiment_id
+                   ) as run ON run.experiment_id = e.id
+             ORDER BY id DESC
             `
         )).rows;
-        throw(Error("fix experiment list logic"));
     }
 
     public async createExperiment(experiment: Experiment): Promise<void> {
@@ -60,19 +63,52 @@ export default class ExperimentStore {
         }
     }
 
-    public async toggleExperimentActive({ id, active }: Experiment): Promise<void> {
-        var query = '', params = [active, id];
-        if (active) {
-            query = `UPDATE Experiment
-                        SET active=$1, run_count=run_count+1, started_time=CURRENT_TIMESTAMP, ended_time=NULL
-                      WHERE id=$2`
-        } else {
-            query = `UPDATE Experiment
-                        SET active=$1, ended_time=CURRENT_TIMESTAMP
-                      WHERE id=$2`
+    public async toggleExperimentActive({ id }: Experiment): Promise<void> {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            await client.query(`SELECT pg_advisory_lock($1)`, [id]);
+            const experiment = (await client.query(`
+                SELECT id, active, run_count
+                  FROM Experiment
+                 WHERE id=$1
+            `, [id])).rows[0] as Experiment;
+
+            if (experiment.active) {
+                // end current run
+                await client.query(`
+                    UPDATE Experiment
+                       SET active=false
+                     WHERE id=$1
+                `, [id]);
+                await client.query(`
+                    UPDATE Run
+                       SET ended_time=CURRENT_TIMESTAMP
+                     WHERE experiment_id=$1 AND
+                           run_count=$2
+                `, [id, experiment.run_count]);
+            } else {
+                // start new run
+                const new_run_count = experiment.run_count + 1;
+                await client.query(`
+                    UPDATE Experiment
+                       SET run_count=$1,
+                           active=true
+                     WHERE id=$2
+                `, [new_run_count, id]);
+                await client.query(`
+                    INSERT INTO Run(experiment_id, run_count)
+                    VALUES ($1, $2)
+                `, [id, new_run_count]);
+            }
+            await client.query('COMMIT');
+        } catch (e: any) {
+            await client.query('ROLLBACK');
+            throw(e);
+        } finally {
+            await client.query(`SELECT pg_advisory_unlock($1)`, [id]);
+            client.release();
         }
-	    await this.pool.query(query, params);
-        throw(Error("fix toggle logic"));
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
