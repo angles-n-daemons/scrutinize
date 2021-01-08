@@ -44,7 +44,8 @@ export default class ReportingStore {
             [experiment],
         )).rows as Metric[];
 
-        return details;
+        //return details;
+        throw(Error("Use run now"));
     }
 
     public async getPerformance(experiment: string, metric: string): Promise<Performance> {
@@ -101,6 +102,7 @@ export default class ReportingStore {
 
             performance[variant].push(row);
         }
-        return performance;
+        //return performance;
+        throw(Error("Use run now"));
     }
 }

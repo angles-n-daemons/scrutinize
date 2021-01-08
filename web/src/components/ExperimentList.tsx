@@ -67,6 +67,7 @@ export default function ExperimentList() {
     const classes = useStyles();
 
     const [experiments, setExperiments] = useState<any[]>([]);
+    throw(Error("load the experiment run values"));
 
     async function getExperiments() {
         setExperiments(await API.getExperiments());

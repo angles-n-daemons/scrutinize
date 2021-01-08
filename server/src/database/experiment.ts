@@ -13,13 +13,15 @@ export default class ExperimentStore {
     ) {}
 
     public async getExperiments(): Promise<Experiment[]> {
-		return (await this.pool.query(
+		//return (await this.pool.query(
+		(await this.pool.query(
             `
             SELECT id, name, percentage, active, started_time, ended_time
             FROM Experiment
             ORDER BY id DESC
             `
         )).rows;
+        throw(Error("fix experiment list logic"));
     }
 
     public async createExperiment(experiment: Experiment): Promise<void> {
@@ -70,6 +72,7 @@ export default class ExperimentStore {
                       WHERE id=$2`
         }
 	    await this.pool.query(query, params);
+        throw(Error("fix toggle logic"));
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
@@ -90,5 +93,6 @@ export default class ExperimentStore {
             `,
             [user_id, variant, error, duration_ms, experiment_name],
         );
+        throw(Error("fix treatment logic"));
     }
 }
