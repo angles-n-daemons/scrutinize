@@ -7,9 +7,10 @@ CREATE TABLE Treatment(
 	error           VARCHAR(256),
 	duration_ms     NUMERIC,
 	created_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	experiment_run  INT NOT NULL,
-	experiment_id   INT NOT NULL REFERENCES Experiment(id)
+	experiment_run  INT NOT NULL REFERENCES Run(id)
 );
+
+CREATE INDEX idx_treatment_experiment_run_user ON Treatment(experiment_id, experiment_run);
 -- +goose StatementEnd
 
 -- +goose Down
