@@ -7,7 +7,7 @@ CREATE TABLE Measurement(
 	created_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_measurement_metric_date ON Measurement(metric_name, created_time);
+CREATE INDEX idx_measurement_metric_time_user ON Measurement(metric_name, created_time, user_id);
 -- +goose StatementEnd
 
 -- +goose Down
