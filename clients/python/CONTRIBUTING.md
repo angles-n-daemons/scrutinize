@@ -4,8 +4,13 @@
 
 ## Seeding (and verifying client integration)
 
-`npm build && node build/seed.js`
+`python scrutinize/seed.py`
 
 ## Publishing
 
-Change version in package.json then `npm publish`
+Change version in setup.py then do:
+
+```
+python3 setup.py sdist bdist_wheel
+python3 -m twine upload dist/*
+```
