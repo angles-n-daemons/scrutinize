@@ -10,19 +10,18 @@ export default class ReportingRouter {
 
 	public routes(): ExpressRouter {
 		const router = toAsyncRouter(ExpressRouter());
-        console.log('giving routes');
-		router.get('/details/:experiment', this.getDetails.bind(this));
-		router.get('/performance/:experiment/:metric', this.getPerformance.bind(this));
+		router.get('/details/:run_id', this.getDetails.bind(this));
+		router.get('/performance/:run_id/:metric', this.getPerformance.bind(this));
 		return router;
 	}
 
 	private async getDetails(req: Request, res: Response) {
-		res.json(await this.controller.getDetails(req.params.experiment || ''));
+		res.json(await this.controller.getDetails(parseInt(req.params.run_id || '0')));
 	}
 
 	private async getPerformance(req: Request, res: Response) {
 		res.json(await this.controller.getPerformance(
-            req.params.experiment || '',
+            parseInt(req.params.run_id || '0'),
             req.params.metric || '',
         ));
 	}

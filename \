@@ -1,0 +1,13 @@
+            WITH TreatmentLookup AS (          
+                SELECT t.user_id, t.variant    
+                  FROM Treatment t             
+                  JOIN Run r ON r.id=t.run_id  
+                 WHERE r.id=$1                 
+            )                                  
+            SELECT DATE(m.created_time), tl.variant, COUNT(*), AVG(value), STDDEV(value)
+              FROM Measurement m
+              JOIN TreatmentLookup tl ON tl.user_id=m.user_id
+             WHERE m.created_time BETWEEN COALESCE($2, CURRENT_TIMESTAMP) AND COALESCE($3, CURRENT_TIMESTAMP) AND
+                   m.metric_name=$4
+             GROUP BY 1, 2        
+             ORDER BY 1 ASC, 2 ASC

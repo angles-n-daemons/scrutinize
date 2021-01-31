@@ -145,12 +145,12 @@ class API {
         return '';
     }
 
-    async getDetails(experiment: string): Promise<ExperimentDetails> {
-        return await(await fetch(`${BASE_PATH}/details/${experiment}`)).json() as ExperimentDetails;
+    async getDetails(runID: string): Promise<ExperimentDetails> {
+        return await(await fetch(`${BASE_PATH}/details/${runID}`)).json() as ExperimentDetails;
     }
 
-    async getPerformance(experiment: string, metric: string): Promise<PerformanceData> {
-        return await(await fetch(`${BASE_PATH}/performance/${experiment}/${metric}`)).json() as PerformanceData;
+    async getPerformance(runID: string, metric: string): Promise<PerformanceData> {
+        return await(await fetch(`${BASE_PATH}/performance/${runID}/${metric}`)).json() as PerformanceData;
     }
 }
 

@@ -9,11 +9,11 @@ export default class ReportingController {
         private store: ReportingStore,
     ) {}
 
-    public async getDetails(experiment: string): Promise<Details> {
-        return await this.store.getDetails(experiment);
+    public async getDetails(runID: number): Promise<Details> {
+        return await this.store.getDetails(runID);
     }
 
-    public async getPerformance(experiment: string, metric: string): Promise<Performance> {
-        return await this.store.getPerformance(experiment, metric);
+    public async getPerformance(runID: number, metric: string): Promise<Performance> {
+        return await this.store.getPerformance(runID, metric);
     }
 }

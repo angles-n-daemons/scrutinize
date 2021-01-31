@@ -18,7 +18,7 @@ const useStyles = makeStyles({
 export default function PerformancePage() {
     const classes = useStyles();
     const params = new URLSearchParams(window.location.search);
-    const experiment = params.get('experiment') || '';
+    const runID = params.get('run_id') || '';
 
     const [details, setDetails] = useState<ExperimentDetails>({
         name: ' ',
@@ -32,18 +32,18 @@ export default function PerformancePage() {
 
     useEffect(() => {
         async function getDetails() {
-            setDetails(await API.getDetails(experiment));
+            setDetails(await API.getDetails(runID));
         }
         getDetails();
-    }, [experiment]);
+    }, [runID]);
 
 
-    if (experiment) {
+    if (runID) {
         return (<div className={classes.root}>
             <PerformanceInfoBar details={details} />
             {details.evaluation_criterion.map((metric: Metric) => {
                 const performanceChartProps = {
-                    experiment: experiment,
+                    runID: runID,
                     metric: metric.name,
                 };
                 return (<div key={metric.id}>

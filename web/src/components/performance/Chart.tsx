@@ -7,7 +7,7 @@ import API, { PerformanceData, DataPoint } from 'api/api';
 const Z = 1.960;
 
 interface PerformanceChartProps {
-    experiment: string;
+    runID: string;
     metric: string;
 }
 
@@ -19,7 +19,7 @@ const useStyles = makeStyles({
 });
 
 export default function PerformanceChart ({
-    experiment,
+    runID,
     metric,
 }: PerformanceChartProps) {
     const classes = useStyles();
@@ -32,10 +32,10 @@ export default function PerformanceChart ({
 
     useEffect(() => {
         async function getData() {
-            setPerformanceData(await API.getPerformance(experiment, metric));
+            setPerformanceData(await API.getPerformance(runID, metric));
         }
         getData();
-    }, [experiment, metric]);
+    }, [runID, metric]);
 
     const experimentDataMap: Record<string, DataPoint> = {};
     for (const dataPoint of performanceData.experiment) {
@@ -94,7 +94,7 @@ export default function PerformanceChart ({
           },
           legend: {position: 'bottom', textStyle: {color: 'black', fontSize: 16}}
         }}
-        rootProps={{ 'data-id': `${experiment}-${metric}` }}
+        rootProps={{ 'data-id': `${runID}-${metric}` }}
       />
     </div>);
 };
