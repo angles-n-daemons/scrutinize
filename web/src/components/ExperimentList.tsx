@@ -8,12 +8,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Switch from '@material-ui/core/Switch';
-
-import { Link } from "react-router-dom";
 
 import API from 'api/api';
 import ExperimentForm from 'components/experiment/ExperimentForm';
+import StartExperimentForm from 'components/experiment/StartExperimentForm';
+import EndExperimentForm from 'components/experiment/EndExperimentForm';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -55,13 +54,7 @@ const useStyles = makeStyles({
   table: {
     minWidth: 700,
   },
-  editButton: {
-    marginRight: '5px',
-  }
 });
-
-const TOGGLE_ID_PREFIX = 'active-toggle-';
-
 
 export default function ExperimentList() {
     const classes = useStyles();
@@ -74,20 +67,6 @@ export default function ExperimentList() {
     useEffect(() => {
         getExperiments();
     }, []);
-
-    function handleSwitchChange(e: React.SyntheticEvent) {
-        const element = (e.target as HTMLInputElement)
-        const idxStr = element.id.replace(TOGGLE_ID_PREFIX, '');
-        const idx = parseInt(idxStr);
-        experiments[idx].active = element.checked;
-        const experiment = {
-            ...experiments[idx],
-            active: element.checked,
-        };
-        experiments[idx] = experiment;
-        setExperiments([...experiments]);
-        API.toggleExperimentActive(experiment);
-    }
 
     return (
       <div className={classes.root}>
@@ -103,29 +82,26 @@ export default function ExperimentList() {
                     <TableRow>
                         <StyledTableCell>Name</StyledTableCell>
                         <StyledTableCell align="right">Rollout</StyledTableCell>
-                        <StyledTableCell align="right">Start</StyledTableCell>
-                        <StyledTableCell align="right">Active</StyledTableCell>
-                        <StyledTableCell align="right">Performance</StyledTableCell>
+                        <StyledTableCell align="right">Status</StyledTableCell>
+                        <StyledTableCell align="right">Activity</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                   {experiments.map((experiment, idx) => {
+                    const experimentActivityButton = experiment.active ? 
+                        <EndExperimentForm updateExperiments={getExperiments} experimentId={experiment.id}/> :
+                        <StartExperimentForm updateExperiments={getExperiments} experimentId={experiment.id}/>;
                     return (
                         <StyledTableRow key={experiment.id}>
-                            <StyledTableCell align="right">{experiment.name}</StyledTableCell>
-                            <StyledTableCell align="right">{experiment.percentage}%</StyledTableCell>
-                            <StyledTableCell align="right">{new Date(experiment.started_time).toLocaleString('en-US')}</StyledTableCell>
+                            <StyledTableCell align="right">{ experiment.name }</StyledTableCell>
                             <StyledTableCell align="right">
-                              <Switch
-                                checked={experiment.active}
-                                onChange={handleSwitchChange}
-                                name={`experiment-active-toggle-${idx}`}
-                                id={`${TOGGLE_ID_PREFIX}${idx}`}
-                                inputProps={{ 'aria-label': 'secondary checkbox' }}
-                              />
+                                { experiment.active ? `${experiment.percentage}%` : '' }
                             </StyledTableCell>
                             <StyledTableCell align="right">
-                                <Button component={Link} to={`/performance?experiment=${experiment.name}`} variant="outlined" color="secondary">Performance</Button>
+                                { experiment.active ? "running" : "inactive" }
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                                { experimentActivityButton }
                             </StyledTableCell>
                         </StyledTableRow>
                     );

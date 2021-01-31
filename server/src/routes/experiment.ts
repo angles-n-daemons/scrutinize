@@ -12,7 +12,8 @@ export default class ExperimentRouter {
 		const router = toAsyncRouter(ExpressRouter());
 		router.get('/experiment', this.getExperiment.bind(this));
 		router.post('/experiment', this.postExperiment.bind(this));
-		router.post('/experiment/active', this.postExperimentActive.bind(this));
+		router.post('/experiment/start', this.postExperimentStart.bind(this));
+		router.post('/experiment/end', this.postExperimentEnd.bind(this));
 		router.post('/treatment', this.postTreatment.bind(this));
 		return router;
 	}
@@ -26,10 +27,15 @@ export default class ExperimentRouter {
 		res.json({status: 'ok'});
 	}
 
-    private async postExperimentActive(req: Request, res: Response) {
-		await this.controller.toggleExperimentActive(req.body);
+	private async postExperimentStart(req: Request, res: Response) {
+		await this.controller.startExperiment(req.body);
 		res.json({status: 'ok'});
-    }
+	}
+
+	private async postExperimentEnd(req: Request, res: Response) {
+		await this.controller.endExperiment(req.body);
+		res.json({status: 'ok'});
+	}
 
 	private async postTreatment(req: Request, res: Response) {
 		await this.controller.createTreatment(req.body);

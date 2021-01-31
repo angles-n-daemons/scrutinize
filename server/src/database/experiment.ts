@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 
 import {
     Experiment,
+    Run,
     Treatment,
 } from 'database/model';
 
@@ -15,35 +16,77 @@ export default class ExperimentStore {
     public async getExperiments(): Promise<Experiment[]> {
 		return (await this.pool.query(
             `
-            SELECT e.id, e.name, e.percentage, e.active, run.started_time, run.ended_time
+            SELECT e.id, e.name, e.active, r.id as run_id, r.percentage
               FROM Experiment e
               LEFT JOIN (
-                   SELECT experiment_id, MAX(started_time) as started_time, MAX(ended_time) as ended_time
+                   SELECT MAX(id) as id, experiment_id
                      FROM Run
                     GROUP BY experiment_id
-                   ) as run ON run.experiment_id = e.id
-             ORDER BY id DESC
+                   ) as cr ON cr.experiment_id = e.id AND e.active
+              LEFT JOIN Run r ON r.id=cr.id
+             ORDER BY e.id DESC
             `
         )).rows;
     }
 
-    public async createExperiment(experiment: Experiment): Promise<void> {
+    public async createExperiment({ name, description }: Experiment): Promise<Experiment> {
+        try {
+            const id = (await this.pool.query(
+                `
+                INSERT INTO Experiment(name, description)
+                VALUES ($1, $2)
+                RETURNING id
+                `,
+                [name, description]
+            )).rows[0].id as unknown as number;
+            return {
+                id,
+                name,
+                description,
+                active: false,
+            };
+        } catch(e: any) {
+            if (e instanceof Error) {
+                if (e.message.indexOf('unique constraint') !== -1) {
+                    e = UserError(e, 'Experiment name taken, please choose a different one');
+                }
+            }
+            throw(e);
+        }
+    }
+
+    public async startExperiment({
+        experiment_id,
+        percentage,
+        metrics,
+    }: Run): Promise<void> {
         const client = await this.pool.connect();
         try {
             await client.query('BEGIN');
+
+            await client.query(
+                `
+                UPDATE Experiment
+                   SET active=true
+                 WHERE id=$1
+                `,
+                [experiment_id],
+            );
+
             const res = await client.query(
                 `
-                INSERT INTO Experiment(name, percentage, active)
-                VALUES ($1, $2, FALSE)
+                INSERT INTO Run(experiment_id, percentage)
+                VALUES ($1, $2)
                 RETURNING id
                 `,
-                [experiment.name, experiment.percentage],
+                [experiment_id, percentage],
             );
+
             // NOTE: pg-node prepared statements don't support execution for multiple values i think
-            for (const metric of experiment.evaluation_criterion || []) {
+            for (const metric of metrics || []) {
                 await client.query(
                     `
-                    INSERT INTO EvaluationCriterion (experiment_id, metric_id)
+                    INSERT INTO EvaluationCriterion (run_id, metric_id)
                     VALUES ($1, $2)
                     `,
                     [res.rows[0].id, metric.id],
@@ -51,11 +94,6 @@ export default class ExperimentStore {
             }
             await client.query('COMMIT');
         } catch (e: any) {
-            if (e instanceof Error) {
-                if (e.message.indexOf('unique constraint') !== -1) {
-                    e = UserError(e, 'Experiment name taken, please choose a different one');
-                }
-            }
             await client.query('ROLLBACK');
             throw(e);
         } finally {
@@ -63,72 +101,64 @@ export default class ExperimentStore {
         }
     }
 
-    public async toggleExperimentActive({ id }: Experiment): Promise<void> {
+    public async endExperiment(experiment_id: number): Promise<void> {
         const client = await this.pool.connect();
         try {
             await client.query('BEGIN');
-            await client.query(`SELECT pg_advisory_lock($1)`, [id]);
-            const experiment = (await client.query(`
-                SELECT id, active, run_count
-                  FROM Experiment
-                 WHERE id=$1
-            `, [id])).rows[0] as Experiment;
 
-            if (experiment.active) {
-                // end current run
-                await client.query(`
-                    UPDATE Experiment
-                       SET active=false
-                     WHERE id=$1
-                `, [id]);
-                await client.query(`
-                    UPDATE Run
-                       SET ended_time=CURRENT_TIMESTAMP
-                     WHERE experiment_id=$1 AND
-                           run_count=$2
-                `, [id, experiment.run_count]);
-            } else {
-                // start new run
-                const new_run_count = experiment.run_count + 1;
-                await client.query(`
-                    UPDATE Experiment
-                       SET run_count=$1,
-                           active=true
-                     WHERE id=$2
-                `, [new_run_count, id]);
-                await client.query(`
-                    INSERT INTO Run(experiment_id, run_count)
-                    VALUES ($1, $2)
-                `, [id, new_run_count]);
-            }
+            await client.query(
+                `
+                UPDATE Experiment
+                   SET active=false
+                 WHERE id=$1
+                `,
+                [experiment_id],
+            );
+
+            await client.query(
+                `
+                UPDATE RUN
+                   SET ended_time=CURRENT_TIMESTAMP
+                 WHERE id=(SELECT MAX(id) FROM Run WHERE experiment_id=$1)
+                `,
+                [experiment_id],
+            );
+
             await client.query('COMMIT');
         } catch (e: any) {
             await client.query('ROLLBACK');
             throw(e);
         } finally {
-            await client.query(`SELECT pg_advisory_unlock($1)`, [id]);
             client.release();
         }
     }
 
     public async createTreatment(t: Treatment): Promise<void> {
-        const { user_id, variant, error, duration_ms, experiment_name } = t;
+        const { user_id, run_id, variant, error, duration_ms } = t;
 		await this.pool.query(
             `
             INSERT INTO Treatment(
                 user_id,
+                run_id,
                 variant,
                 error,
-                duration_ms,
-                experiment_id,
-                experiment_run
+                duration_ms
             )
-            SELECT $1, $2, $3, $4, id, run_count
-              FROM experiment e
-             WHERE e.name=$5
+            VALUES ($1, $2, $3, $4, $5)
             `,
-            [user_id, variant, error, duration_ms, experiment_name],
+            [user_id, run_id, variant, error, duration_ms],
         );
-        throw(Error("fix treatment logic"));
+    }
+
+    public async getExperiment(experiment_id: number): Promise<Experiment | null> {
+		const rows = (await this.pool.query(
+            `
+            SELECT *
+              FROM Experiment
+             WHERE id=$1
+            `,
+            [experiment_id],
+        )).rows;
+        return rows.length ? rows[0] as unknown as Experiment : null;
     }
 }

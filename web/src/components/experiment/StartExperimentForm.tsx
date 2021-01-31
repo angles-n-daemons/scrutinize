@@ -9,13 +9,17 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
-import API from 'api/api';
+import MetricSelect from 'components/experiment/MetricSelect';
+import PercentageSlider from 'components/experiment/PercentageSlider';
+
+import API, { Metric } from 'api/api';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
     overflowY: 'visible',
   },
   dialogContent: {
+    width: '600px',
     overflowY: 'visible',
   },
   form: {
@@ -25,28 +29,34 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: '8px 0px 12px',
   },
+  evaluationMetricsText: {
+    marginBottom: '4px',
+  },
   errorField: {
     width: '100%',
     textAlign: 'center',
   }
 }));
 
-export default function ExperimentForm({
+export default function ExperimentFormCopy({
+    experimentId,
     updateExperiments,
-}: {updateExperiments: () => Promise<void>}) {
+}: {
+  experimentId: number,
+  updateExperiments: () => Promise<void>,
+}) {
   const classes = useStyles();
 
   const [open, setOpen] = useState(false);
   const [savingValue, setSavingValue] = useState<boolean>(false);
-  const [experimentName, setExperimentName] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+  const [rollout, setRollout] = useState<number>(20);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
   const [errorText, setErrorText] = useState<string>('');
 
   function resetState() {
     setOpen(false);
     setSavingValue(false);
-    setExperimentName('');
-    setDescription('');
+    setRollout(5);
     setErrorText('');
   }
 
@@ -62,14 +72,10 @@ export default function ExperimentForm({
     element.preventDefault();
     setSavingValue(true);
     try {
-        if (!experimentName) {
-            setErrorText('Must include a name for your experiment');
-            return
-        }
-
-        const userError = await API.saveExperiment({
-            name: experimentName,
-            description: description,
+        const userError = await API.startExperiment({
+            experiment_id: experimentId,
+            percentage: rollout,
+            metrics: metrics,
         });
 
         if (userError) {
@@ -86,54 +92,36 @@ export default function ExperimentForm({
     }
   }
 
-  function handleChangeName(e: React.ChangeEvent<Element>) {
-    const newName = (e.target as HTMLInputElement).value;
-    setExperimentName(newName.replace(/[^0-9a-z_.]/gi, ''));
-  }
-
-  function handleChangeDescription(e: React.ChangeEvent<{}>) {
-    setDescription((e.target as HTMLInputElement).value);
+  function handleChangeRollout(_: React.ChangeEvent<{}>, value: number | number[]) {
+    setRollout(value as number);
   }
 
   return (
     <div>
       <Button variant="contained" color="primary" onClick={handleClickOpen}>
-        Create Experiment
+        Start
       </Button>
       <Dialog className={classes.dialog} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Create Experiment</DialogTitle>
+        <DialogTitle id="form-dialog-title">Start Experiment</DialogTitle>
         <DialogContent className={classes.dialogContent}>
           <form className={classes.form} noValidate onSubmit={submitForm}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <TextField
-                  name="experimentName"
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="experimentName"
-                  label="Experiment Name"
-                  autoFocus
-                  disabled={savingValue}
-                  value={experimentName}
-                  onChange={handleChangeName}
-                />
-                <Typography component="div" variant="body2" color="textSecondary">
-                  Permitted: letters, numbers, periods and underscores
+                <Typography component="div" variant="body1">
+                  Rollout
                 </Typography>
+                <PercentageSlider
+                  disabled={savingValue}
+                  valueLabelDisplay="auto"
+                  aria-label="percentage slider"
+                  onChange={handleChangeRollout}
+                  defaultValue={5} />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  name="description"
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="description"
-                  label="Description"
-                  disabled={savingValue}
-                  value={description}
-                  onChange={handleChangeDescription}
-                />
+                <Typography className={classes.evaluationMetricsText} component="div" variant="body1">
+                  Evaluation Metrics
+                </Typography>
+                 <MetricSelect setMetrics={setMetrics} />
               </Grid>
               <Grid item xs={12}>
                 <Typography className={classes.errorField} component="div" variant="body2" color="error">

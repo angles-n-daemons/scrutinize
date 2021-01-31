@@ -11,7 +11,7 @@ class TestExperiment(unittest.TestCase):
     def test_call(self):
         scrutinize = ScrutinizeClient()
         scrutinize.get_experiments = AsyncMock(return_value={
-            'testexp': {'percentage': 50, 'active': True},
+            'testexp': {'run_id': 3, 'percentage': 50, 'active': True},
         })
         scrutinize.create_treatment = AsyncMock()
 
@@ -40,7 +40,7 @@ class TestExperiment(unittest.TestCase):
     def test_call_exception(self):
         scrutinize = ScrutinizeClient()
         scrutinize.get_experiments = AsyncMock(return_value = {
-            'testexp': {'percentage': 50, 'active': True},
+            'testexp': {'run_id': 3, 'percentage': 50, 'active': True},
         })
         scrutinize._get_variant = AsyncMock(return_value=(False, 'control'))
         scrutinize.create_treatment = AsyncMock()
@@ -61,7 +61,7 @@ class TestExperiment(unittest.TestCase):
 
         # We only really care about the error parameter
         scrutinize.create_treatment.assert_called_with(
-            'testexp',
+            3,
             'fake_person',
             'control',
              ANY,
@@ -70,6 +70,9 @@ class TestExperiment(unittest.TestCase):
 
     def test_call_duration(self):
         scrutinize = ScrutinizeClient()
+        scrutinize.get_experiments = AsyncMock(return_value = {
+            'testexp': {'run_id': 3, 'percentage': 50, 'active': True},
+        })
         scrutinize._get_variant = AsyncMock(return_value=(False, 'control'))
         scrutinize.create_treatment = AsyncMock()
 
@@ -84,7 +87,7 @@ class TestExperiment(unittest.TestCase):
 
         # We only really care about the duration_ms parameter
         scrutinize.create_treatment.assert_called_with(
-            'testexp',
+            3,
             'fake_person',
             'control',
             5000,
@@ -133,7 +136,7 @@ class TestExperiment(unittest.TestCase):
         ]
         scrutinize = ScrutinizeClient()
         scrutinize.get_experiments = AsyncMock(return_value={
-            'testexp': {'percentage': 50, 'active': True},
+            'testexp': {'run_id': 3, 'percentage': 50, 'active': True},
         })
 
         for user_id, expected in tests:
@@ -143,8 +146,8 @@ class TestExperiment(unittest.TestCase):
     def test_get_variant_differs_with_experiment(self):
         scrutinize = ScrutinizeClient()
         scrutinize.get_experiments = AsyncMock(return_value={
-            'testexp': {'percentage': 50, 'active': True},
-            'otherexp': {'percentage': 50, 'active': True},
+            'testexp': {'run_id': 3, 'percentage': 50, 'active': True},
+            'otherexp': {'run_id': 3, 'percentage': 50, 'active': True},
         })
 
 
@@ -154,8 +157,8 @@ class TestExperiment(unittest.TestCase):
     def test_get_variant_active_param(self):
         scrutinize = ScrutinizeClient()
         scrutinize.get_experiments = AsyncMock(return_value={
-            'testexp': {'percentage': 50, 'active': True},
-            'otherexp': {'percentage': 50, 'active': False},
+            'testexp': {'run_id': 3, 'percentage': 50, 'active': True},
+            'otherexp': {'run_id': 3, 'percentage': 50, 'active': False},
         })
 
         # id lands in exp group for both experiments
@@ -167,7 +170,7 @@ class TestExperiment(unittest.TestCase):
     def test_get_variant_experiment_doesnt_exist(self):
         scrutinize = ScrutinizeClient()
         scrutinize.get_experiments = AsyncMock(return_value={
-            'SOME_OTHER_EXP': {'percentage': 50, 'active': True},
+            'SOME_OTHER_EXP': {'run_id': 3, 'percentage': 50, 'active': True},
         })
         assert asyncio.run(scrutinize._get_variant('testexp', 'johnny')) == (False, 'control')
 
