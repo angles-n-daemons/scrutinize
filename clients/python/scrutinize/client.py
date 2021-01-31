@@ -57,7 +57,7 @@ class ScrutinizeClient:
         finally:
             duration_ms = (get_time() - start_time) * 1000
             await self.create_treatment(
-                experiment_name,
+                await self.get_run_id(experiment_name),
                 user_id,
                 variant_str,
                 duration_ms,
@@ -86,6 +86,11 @@ class ScrutinizeClient:
             is_experiment = id_int < experiment_config['percentage']
 
         return is_experiment, 'experiment' if is_experiment else 'control'
+
+    async def get_run_id(self, experiment_name: str) -> Optional[int]:
+        experiments = await self.get_experiments()
+        experiment_config = experiments.get(experiment_name, None)
+        return experiment_config.get('run_id', None) if experiment_config else None
 
     @staticmethod
     async def _resolve(
@@ -126,7 +131,7 @@ class ScrutinizeClient:
 
     async def create_treatment(
         self,
-        experiment_name: str,
+        run_id: int,
         user_id: str,
         variant: str,
         duration_ms: float,
@@ -143,7 +148,7 @@ class ScrutinizeClient:
         """
         err_str = '' if error is None else str(error)
         await self.post('/treatment', {
-            'experiment_name': experiment_name,
+            'run_id': run_id,
             'user_id': user_id,
             'variant': variant,
             'error': err_str,

@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
 import {
-    Experiment,
+    Run,
     Metric,
     VariantDetails,
     Details,
@@ -9,19 +9,18 @@ import {
     DataPoint,
 } from 'database/model';
 
-import { UserError } from '../middleware/errors';
-
 export default class ReportingStore {
     constructor (
         private pool: Pool,
     ) {}
 
-    public async getDetails(experiment: string): Promise<Details> {
+    public async getDetails(runID: number): Promise<Details> {
 		const details: Details = (await this.pool.query(
-            `SELECT id, name, percentage, started_time, ended_time
-              FROM Experiment
-             WHERE name=$1`,
-            [experiment],
+            `SELECT e.id, e.name, r.percentage, r.started_time, r.ended_time
+               FROM Experiment e
+               JOIN Run r ON r.experiment_id=e.id
+               WHERE r.id=$1`,
+            [runID],
         )).rows[0] as Details;
 
         details.variants = (await this.pool.query(
@@ -31,34 +30,31 @@ export default class ReportingStore {
                     AVG(duration_ms) as duration_ms,
                     1.0 * SUM(CASE WHEN LENGTH(error) > 0 THEN 1 ELSE 0 END) / COUNT(*) as pct_error
                FROM Treatment
-              WHERE experiment_id=(SELECT id FROM Experiment WHERE name=$1)
+              WHERE run_id=$1
               GROUP BY variant`,
-            [experiment],
+            [runID],
         )).rows as VariantDetails[];
 
         details.evaluation_criterion = (await this.pool.query(
             `SELECT id, name, type
                FROM Metric m
                JOIN EvaluationCriterion ec ON ec.metric_id = m.id
-              WHERE ec.experiment_id=(SELECT id FROM Experiment WHERE name=$1)`,
-            [experiment],
+              WHERE ec.run_id=$1`,
+            [runID],
         )).rows as Metric[];
 
         return details;
     }
 
-    public async getPerformance(experiment: string, metric: string): Promise<Performance> {
-		const exp = (await this.pool.query(
+    public async getPerformance(runID: number, metric: string): Promise<Performance> {
+		const run = (await this.pool.query(
             `
             SELECT id, started_time, ended_time
-            FROM Experiment
-            WHERE name=$1
+            FROM Run
+            WHERE id=$1
             `,
-            [experiment],
-        )).rows as Experiment[];
-        if (exp.length !== 1) {
-            throw UserError(Error('PGStore.getPerformance: incorrect number of experiments'), 'Unable to complete your request');
-        }
+            [runID],
+        )).rows[0] as Run;
 
         /*
          * With the following query, we preselect a TreatmentLookup
@@ -73,8 +69,8 @@ export default class ReportingStore {
             WITH TreatmentLookup AS (
                 SELECT t.user_id, t.variant
                   FROM Treatment t
-                  JOIN Experiment e ON e.id=t.experiment_id AND t.experiment_run=e.run_count
-                 WHERE e.id=$1
+                  JOIN Run r ON r.id=t.run_id
+                 WHERE r.id=$1
             )
             SELECT DATE(m.created_time), tl.variant, COUNT(*), AVG(value), STDDEV(value)
               FROM Measurement m
@@ -84,7 +80,7 @@ export default class ReportingStore {
              GROUP BY 1, 2
              ORDER BY 1 ASC, 2 ASC
             `,
-            [exp[0].id, exp[0].started_time, exp[0].ended_time, metric],
+            [runID, run.started_time, run.ended_time, metric],
         )).rows as DataPoint[];
 
         const performance: Performance = {

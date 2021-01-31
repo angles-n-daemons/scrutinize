@@ -1,10 +1,11 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE EvaluationCriterion(
-    experiment_id    INT NOT NULL REFERENCES Experiment(id),
+    run_id           INT NOT NULL REFERENCES Run(id),
     metric_id        INT NOT NULL REFERENCES Metric(id),
     weight           NUMERIC NOT NULL DEFAULT 1.0,
-    deleted_time     TIMESTAMP
+    deleted_time     TIMESTAMP,
+    PRIMARY KEY(run_id, metric_id)
 );
 -- +goose StatementEnd
 

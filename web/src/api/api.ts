@@ -1,11 +1,17 @@
-const BASE_PATH = '/api/v1'
+const BASE_PATH = '/api/v1';
 
 export interface Experiment {
     id?: number;
     name: string;
-    percentage: number;
+    description: string;
     active?: boolean;
-    evaluation_criterion: Metric[];
+}
+
+export interface ExperimentConfig {
+    id?: number;
+    experiment_id: number;
+    percentage: number;
+    metrics: Metric[];
 }
 
 export interface Metric {
@@ -68,6 +74,44 @@ class API {
         return '';
     }
 
+    async startExperiment(config: ExperimentConfig): Promise<string> {
+        const res = await fetch(`${BASE_PATH}/experiment/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(config),
+        });
+        if (res.status > 399) {
+            const data = await res.json()
+            if ('userError' in data) {
+                return data['userError'];
+            } else {
+                return 'Unknown server error';
+            }
+        }
+        return '';
+    }
+
+    async endExperiment(experiment_id: number): Promise<string> {
+        const res = await fetch(`${BASE_PATH}/experiment/end`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: experiment_id }),
+        });
+        if (res.status > 399) {
+            const data = await res.json()
+            if ('userError' in data) {
+                return data['userError'];
+            } else {
+                return 'Unknown server error';
+            }
+        }
+        return '';
+    }
+
     async toggleExperimentActive(experiment: Experiment) {
         await fetch(`${BASE_PATH}/experiment/active`, {
             method: 'POST',
@@ -101,12 +145,12 @@ class API {
         return '';
     }
 
-    async getDetails(experiment: string): Promise<ExperimentDetails> {
-        return await(await fetch(`${BASE_PATH}/details/${experiment}`)).json() as ExperimentDetails;
+    async getDetails(runID: string): Promise<ExperimentDetails> {
+        return await(await fetch(`${BASE_PATH}/details/${runID}`)).json() as ExperimentDetails;
     }
 
-    async getPerformance(experiment: string, metric: string): Promise<PerformanceData> {
-        return await(await fetch(`${BASE_PATH}/performance/${experiment}/${metric}`)).json() as PerformanceData;
+    async getPerformance(runID: string, metric: string): Promise<PerformanceData> {
+        return await(await fetch(`${BASE_PATH}/performance/${runID}/${metric}`)).json() as PerformanceData;
     }
 }
 

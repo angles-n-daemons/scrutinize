@@ -2,13 +2,10 @@
 -- +goose StatementBegin
 CREATE TABLE Experiment(
 	id               SERIAL PRIMARY KEY,
-	name             VARCHAR(256) UNIQUE,
-	percentage       INT NOT NULL,
-	active           BOOLEAN NOT NULL,
-	run_count        INT NOT NULL DEFAULT 0,
-	created_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	started_time     TIMESTAMP,
-	ended_time       TIMESTAMP
+	name             VARCHAR(256) NOT NULL UNIQUE,
+	description      TEXT,
+	active           BOOLEAN NOT NULL DEFAULT FALSE,
+	created_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 

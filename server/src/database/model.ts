@@ -1,22 +1,28 @@
 export interface Experiment {
     id?: number;
     name: string;
-    percentage: number;
+    description: string;
     active: boolean;
-    run_count: number;
-    evaluation_criterion?: Metric[];
+    percentage?: number;
+    run_id?: number;
     created_time?: Date;
+}
+
+export interface Run {
+    id?: number
+    experiment_id: number;
+    percentage: number;
+    metrics?: Metric[];
     started_time?: Date;
     ended_time?: Date;
 }
 
 export interface Treatment {
     user_id: string;
+    run_id: number;
     variant: 'control' | 'experiment';
     error: string;
     duration_ms: number;
-    experiment_name: string;
-    experiment_run?: number;
 }
 
 export interface Measurement {

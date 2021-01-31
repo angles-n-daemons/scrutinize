@@ -19,7 +19,7 @@ async function testCall() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.axios = mockAxios;
     scrutinize.getExperiments = async () => {
-        return {'testexp': {'name': 'testexp', 'percentage': 50, 'active': true}}
+        return {'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true}}
     };
 
     const control = () => 5;
@@ -44,10 +44,34 @@ async function testCall() {
     }
 }
 
+async function testCallCreateTreatment() {
+    const scrutinize = new ScrutinizeClient();
+    scrutinize.axios = mockAxios;
+    scrutinize.getExperiments = async () => {
+        return {'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true}}
+    };
+
+    const control = () => 5;
+    const variant = () => 10;
+
+    scrutinize.createTreatment = async (runID: any, userID: any, variant: any, _: any, _2: string) => {
+        assert(runID === 3);
+        assert(userID === 'mary');
+        assert(variant === 'control');
+    }
+
+    await scrutinize.call(
+        'testexp',
+        'mary',
+        control,
+        variant,
+    );
+}
+
 async function testCallException() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.getExperiments = async () => {
-        return {'testexp': {'name': 'testexp', 'percentage': 50, 'active': true}}
+        return {'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true}}
     };
     scrutinize.getVariant = async () => [false, 'control'];
     var errstring = '';
@@ -72,7 +96,7 @@ async function testCallException() {
 async function testCallDuration() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.getExperiments = async () => {
-        return {'testexp': {'name': 'testexp', 'percentage': 50, 'active': true}}
+        return {'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true}}
     };
     scrutinize.getVariant = async () => [false, 'control'];
 
@@ -140,7 +164,7 @@ async function testGetVariant() {
     ];
     const scrutinize = new ScrutinizeClient();
     scrutinize.getExperiments = async () => {
-        return {'testexp': {'name': 'testexp', 'percentage': 50, 'active': true}}
+        return {'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true}}
     };
 
     for (const [userID, expectedIsExperiment] of tests) {
@@ -153,8 +177,8 @@ async function testGetVariantDiffersByExperiment() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.getExperiments = async () => {
         return {
-            'testexp': {'name': 'testexp', 'percentage': 50, 'active': true},
-            'otherexp': {'name': 'otherexp', 'percentage': 50, 'active': true},
+            'testexp': {'run_id': 3,'name': 'testexp', 'percentage': 50, 'active': true},
+            'otherexp': {'run_id': 3,'name': 'otherexp', 'percentage': 50, 'active': true},
         };
     };
     const userID = 'sally';
@@ -166,8 +190,8 @@ async function testGetVariantActiveParam() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.getExperiments = async () => {
         return {
-            'testexp': {'name': 'testexp', 'percentage': 50, 'active': true},
-            'otherexp': {'name': 'otherexp', 'percentage': 50, 'active': false},
+            'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true},
+            'otherexp': {'run_id': 3, 'name': 'otherexp', 'percentage': 50, 'active': false},
         };
     };
     const userID = 'sally';
@@ -179,7 +203,7 @@ async function testGetVariantExperimentDoesntExist() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.getExperiments = async () => {
         return {
-            'testexp': {'name': 'testexp', 'percentage': 50, 'active': true},
+            'testexp': {'run_id': 3, 'name': 'testexp', 'percentage': 50, 'active': true},
         };
     };
     const userID = 'sally';
@@ -189,6 +213,7 @@ async function testGetVariantExperimentDoesntExist() {
 async function testGetExperimentsUseCached() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.experiments = {'blah': {
+        run_id: 3,
         name: 'blah',
         percentage: 50,
         active: true,
@@ -226,6 +251,7 @@ async function testGetExperimentsPullOnNone() {
 async function testGetExperimentsTimeout() {
     const scrutinize = new ScrutinizeClient();
     scrutinize.experiments = {'blah': {
+        run_id: 3,
         name: 'blah',
         percentage: 50,
         active: true,
@@ -247,6 +273,7 @@ async function testGetExperimentsTimeout() {
 
 async function testScrutinize() {
     testCall();
+    testCallCreateTreatment();
     testCallException();
     testCallDuration();
     testResolveFunc();
