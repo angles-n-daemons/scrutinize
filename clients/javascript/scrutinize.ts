@@ -102,7 +102,7 @@ export default class ScrutinizeClient {
     public  async getRunID(experimentName: string): Promise<number> {
         const experiments = await this.getExperiments();
         const experimentConfig = experiments[experimentName];
-        return experimentConfig.run_id;
+        return experimentConfig ? experimentConfig.run_id : null;
     }
 
     public async resolve(

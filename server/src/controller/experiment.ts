@@ -48,6 +48,9 @@ export default class ExperimentController {
     }
 
     public async createTreatment(treatment: Treatment): Promise<void> {
+        if (!treatment.run_id) {
+            return
+        }
         await this.store.createTreatment(treatment);
     }
 }

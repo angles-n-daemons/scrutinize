@@ -87,10 +87,10 @@ class ScrutinizeClient:
 
         return is_experiment, 'experiment' if is_experiment else 'control'
 
-    async def get_run_id(self, experiment_name: str) -> int:
+    async def get_run_id(self, experiment_name: str) -> Optional[int]:
         experiments = await self.get_experiments()
         experiment_config = experiments.get(experiment_name, None)
-        return experiment_config['run_id']
+        return experiment_config.get('run_id', None) if experiment_config else None
 
     @staticmethod
     async def _resolve(
