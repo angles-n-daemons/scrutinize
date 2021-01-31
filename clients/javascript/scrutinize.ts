@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import md5 from 'md5';
 
 interface Experiment {
-    run_id: number;
+    run_id: number | null;
     name: string;
     percentage: number;
     active: boolean;
@@ -99,7 +99,7 @@ export default class ScrutinizeClient {
         return [isExperiment, isExperiment ? 'experiment' : 'control'];
     }
 
-    public  async getRunID(experimentName: string): Promise<number> {
+    public  async getRunID(experimentName: string): Promise<number | null> {
         const experiments = await this.getExperiments();
         const experimentConfig = experiments[experimentName];
         return experimentConfig ? experimentConfig.run_id : null;
@@ -151,7 +151,7 @@ export default class ScrutinizeClient {
     }
 
     public async createTreatment(
-        runID: number,
+        runID: number | null,
         userID: string,
         variant: string,
         durationMS: number,
