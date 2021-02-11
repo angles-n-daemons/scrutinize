@@ -3,6 +3,7 @@ const BASE_PATH = '/api/v1';
 export interface Experiment {
     id?: number;
     name: string;
+    percentage?: number;
     description: string;
     active?: boolean;
 }

@@ -13,52 +13,57 @@ import StartExperimentForm from 'components/experiment/StartExperimentForm';
 import EndExperimentForm from 'components/experiment/EndExperimentForm';
 import { StyledTableCell, StyledTableRow, tableStyles } from 'components/table/Table';
 
-export default function ExperimentList() {
+export default function ExperimentPage() {
     const classes = tableStyles();
 
     const {experiments, setExperiments} = useContext(ExperimentContext);
+    const experiment = experiments[0];
 
     async function getExperiments() {
         setExperiments(await API.getExperiments());
     }
     useEffect(() => {
-        getExperiments();
+        //getExperiments();
     }, []);
 
+    const experimentActivityButton = experiment.active ? 
+        <EndExperimentForm updateExperiments={getExperiments} experimentId={experiment.id ?? 1}/> :
+        <StartExperimentForm updateExperiments={getExperiments} experimentId={experiment.id ?? 1}/>;
     return (
       <div className={classes.root}>
         <div className={classes.header}>
-          <div className={classes.headerText}>Experiments</div>
+          <div className={classes.headerText}></div>
           <div className={classes.topButton}>
-            <ExperimentForm updateExperiments={getExperiments}/>
+            { experimentActivityButton }
           </div>
         </div>
         <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="customized table">
                 <TableHead>
                     <TableRow>
-                        <StyledTableCell>Name</StyledTableCell>
+                        <StyledTableCell>Run</StyledTableCell>
+                        <StyledTableCell align="right">Start Date</StyledTableCell>
+                        <StyledTableCell align="right">End Date</StyledTableCell>
                         <StyledTableCell align="right">Rollout</StyledTableCell>
-                        <StyledTableCell align="right">Status</StyledTableCell>
-                        <StyledTableCell align="right">Activity</StyledTableCell>
+                        <StyledTableCell align="right">Performance</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                  {experiments.map((experiment, idx) => {
-                    const experimentActivityButton = experiment.active ? 
-                        <EndExperimentForm updateExperiments={getExperiments} experimentId={experiment.id ?? 1}/> :
-                        <StartExperimentForm updateExperiments={getExperiments} experimentId={experiment.id ?? 1}/>;
+                  {[].map((run, idx) => {
                     return (
-                        <StyledTableRow key={experiment.id}>
+                        <StyledTableRow key={idx}>
                             <StyledTableCell align="right">{ experiment.name }</StyledTableCell>
                             <StyledTableCell align="right">
-                                { experiment.active ? `${experiment.percentage}%` : '' }
+                                {}
                             </StyledTableCell>
                             <StyledTableCell align="right">
-                                { experiment.active ? "running" : "inactive" }
+                                {}
                             </StyledTableCell>
                             <StyledTableCell align="right">
-                                { experimentActivityButton }
+                                {}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                                {}
                             </StyledTableCell>
                         </StyledTableRow>
                     );

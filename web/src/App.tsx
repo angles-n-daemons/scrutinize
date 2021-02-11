@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -21,6 +21,8 @@ import {
   Link
 } from "react-router-dom";
 
+import { Experiment } from './api/api';
+import { ExperimentContext, ExperimentState } from './components/context/Context';
 import ExperimentList from './components/ExperimentList';
 import MetricList from './components/MetricList';
 import PerformancePage from './components/Performance';
@@ -53,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function App() {
   const classes = useStyles();
-  console.log(classes.toolbar);
+  const [experiments, setExperiments] = useState<Experiment[]>([]);
 
   return (
     <Router>
@@ -77,18 +79,20 @@ export default function App() {
           <div className={classes.toolbar} />
           <Divider />
           <List>
-            <ListItem component={Link} to='/' button key="Experiments">
-              <ListItemIcon><GraphicEqIcon /></ListItemIcon>
-              <ListItemText primary="Experiments" />
-            </ListItem>
-            <ListItem component={Link} to='/metrics' button key="Metrics">
-              <ListItemIcon><BlurOnIcon /></ListItemIcon>
-              <ListItemText primary="Metrics" />
-            </ListItem>
-            <ListItem component={Link} to='/performance' button key="Performance">
-              <ListItemIcon><TimelineIcon /></ListItemIcon>
-              <ListItemText primary="Performance" />
-            </ListItem>
+            <ExperimentContext.Provider value={{experiments, setExperiments}}>
+              <ListItem component={Link} to='/' button key="ExperimentContext">
+                <ListItemIcon><GraphicEqIcon /></ListItemIcon>
+                <ListItemText primary="ExperimentContext" />
+              </ListItem>
+              <ListItem component={Link} to='/metrics' button key="Metrics">
+                <ListItemIcon><BlurOnIcon /></ListItemIcon>
+                <ListItemText primary="Metrics" />
+              </ListItem>
+              <ListItem component={Link} to='/performance' button key="Performance">
+                <ListItemIcon><TimelineIcon /></ListItemIcon>
+                <ListItemText primary="Performance" />
+              </ListItem>
+            </ExperimentContext.Provider>
           </List>
         </Drawer>
 
