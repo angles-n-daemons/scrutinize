@@ -84,6 +84,7 @@ export default function ExperimentList() {
                         <StyledTableCell align="right">Rollout</StyledTableCell>
                         <StyledTableCell align="right">Status</StyledTableCell>
                         <StyledTableCell align="right">Activity</StyledTableCell>
+                        <StyledTableCell align="right">Description</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
