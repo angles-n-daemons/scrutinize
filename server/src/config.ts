@@ -28,7 +28,7 @@ export default class Config {
 
     static readFromEnvironment(env: ProcessEnv): Config {
         return new Config(
-            parseInt(env[`${ENV_BASE}_PORT`] || '5001'),
+            parseInt(env[`${ENV_BASE}_PORT`] || '11771'),
             env[`${ENV_BASE}_DB_HOST`] || '0.0.0.0',
             parseInt(env[`${ENV_BASE}_DB_PORT`] || '5432'),
             env[`${ENV_BASE}_DB_NAME`] || 'scrutinize',

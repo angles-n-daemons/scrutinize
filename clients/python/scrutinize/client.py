@@ -11,7 +11,7 @@ from typing import Callable, Optional, Union
 class ScrutinizeClient:
     def __init__(
         self,
-        api_url: str='http://localhost:5001',
+        api_url: str='http://localhost:11771',
         experiments_ttl: int=300,
     ):
         self.base_url = f'{api_url}/api/v1'

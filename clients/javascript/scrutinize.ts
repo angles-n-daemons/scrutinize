@@ -15,7 +15,7 @@ export default class ScrutinizeClient {
     public experimentsPullTime = 0;
 
     constructor(
-        apiURL: string='http://localhost:5001',
+        apiURL: string='http://localhost:11771',
         public experimentsTTL: number=300,
     ) {
         this.axios = axios.create({
