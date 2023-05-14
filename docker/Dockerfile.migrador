@@ -8,6 +8,4 @@ RUN apt-get update && apt-get install netcat -y
 
 COPY ./db ./db
 
-COPY ./docker/migrate_db.sh ./
-
 CMD ["./migrate_db.sh"]
